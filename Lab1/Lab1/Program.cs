@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO;
-using System.Threading.Tasks;
+using System.IO; 
 using System.Diagnostics;
 
 namespace Lab1
@@ -17,27 +16,31 @@ List, Dictionary.
 Для двух последних надо вспомнить лямбда-выражения или LINQ-запросы для выполнения задания.
 Напишите консольное приложение которое вызывает написанные Вами методы и замеряет время работы.
 */
+
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            var words = DoWords(ReadFile("WarAndWorld.txt"));
+            var words = new List<string>(DoWords(ReadFile("WarAndWorld.txt")));
             var watch = new Stopwatch();
             watch.Start();
-            UseSortedSet(words);
+            UseIDictionary<SortedList<string, int>>(words, "SortedList");
             watch.Stop();
             Console.WriteLine("Time: {0}", watch.ElapsedMilliseconds);
             watch.Reset();
+
             watch.Start();
-            UseSortedDictionary(words);
+            UseIDictionary<SortedDictionary<string, int>>(words, "SortedDictionary");
             watch.Stop();
             Console.WriteLine("Time: {0}", watch.ElapsedMilliseconds);
             watch.Reset();
+
             watch.Start();
-            UseDictionary(words);
+            UseIDictionary<Dictionary<string, int>>(words, "Dictionary");
             watch.Stop();
             Console.WriteLine("Time: {0}", watch.ElapsedMilliseconds);
             watch.Reset();
+
             watch.Start();
             UseList(words);
             watch.Stop();
@@ -57,7 +60,7 @@ List, Dictionary.
 
         static IEnumerable<string> DoWords(IEnumerable<char> text)
         {
-            var strBuid = new StringBuilder();
+            var strBuid = new StringBuilder(8); // средняя длина русского слова
             foreach (var symbol in text)
             {
                 var symbolLower = char.ToLower(symbol);
@@ -76,147 +79,82 @@ List, Dictionary.
             }
         }
 
-        static void UseSortedSet(IEnumerable<string> words)
+        static void UseIDictionary<T>(IEnumerable<string> words, string nameDataStruct)
+            where T : IDictionary<string, int>, new()
         {
-            var sortList = new SortedList<string, int>();
+            var iDict = new T();
             foreach (var word in words)
             {
-                if (sortList.ContainsKey(word))
+                if (iDict.ContainsKey(word))
                 {
-                    sortList[word]++;
+                    iDict[word]++;
                 }
                 else
                 {
-                    sortList.Add(word, 1);
+                    iDict.Add(word, 1);
                 }
             }
-
-            var p = sortList.OrderByDescending(x => x.Value);
-            Console.WriteLine("---------SortedList--------");
-            Console.WriteLine("Count: {0}", sortList.Count);
-            int i = 0;
-            foreach (var word in p)
+            var p = iDict.OrderByDescending(x => x.Value);
+            Console.WriteLine();
+            Console.WriteLine($"-----------------{nameDataStruct}-----------------------");
+            Console.WriteLine("Count: {0}", iDict.Count);
+            int i = 1;
+            foreach (var pair in p)
             {
-                if (i < 11)
-                    Console.WriteLine("Word: {0} \t Count: {1}", word.Key, word.Value);
-                else
+                Console.WriteLine("{0}. Word: {1} \t Count: {2}", i, pair.Key, pair.Value);
+                i++;
+                if (i > 10)
                 {
                     break;
                 }
-                i++;
             }
         }
-
-
-        static void UseSortedDictionary(IEnumerable<string> words)
-        {
-            var sortDictionary = new SortedDictionary<string, int>();
-            foreach (var word in words)
-            {
-                if (sortDictionary.ContainsKey(word))
-                {
-                    sortDictionary[word]++;
-                }
-                else
-                {
-                    sortDictionary.Add(word, 1);
-                }
-            }
-
-            var p = sortDictionary.OrderByDescending(x => x.Value);
-            Console.WriteLine("---------SortedDictionary--------");
-            Console.WriteLine("Count: {0}", sortDictionary.Count);
-            int i = 0;
-            foreach (var word in p)
-            {
-                if (i < 11)
-                    Console.WriteLine("Word: {0} \t Count: {1}", word.Key, word.Value);
-                else
-                {
-                    break;
-                }
-                i++;
-            }
-        }
-
-        static void UseDictionary(IEnumerable<string> words)
-        {
-            var dictionary = new Dictionary<string, int>();
-            foreach (var word in words)
-            {
-                if (dictionary.ContainsKey(word))
-                {
-                    dictionary[word]++;
-                }
-                else
-                {
-                    dictionary.Add(word, 1);
-                }
-            }
-
-            var p = dictionary.OrderByDescending(x => x.Value);
-            Console.WriteLine("---------Dictionary--------");
-            Console.WriteLine("Count: {0}", dictionary.Count);
-            int i = 0;
-            foreach (var word in p)
-            {
-                if (i < 11)
-                    Console.WriteLine("Word: {0} \t Count: {1}", word.Key, word.Value);
-                else
-                {
-                    break;
-                }
-                i++;
-            }
-        }
-
 
         static void UseList(IEnumerable<string> words)
         {
             var list = new List<Pair<string, int>>();
             foreach (var word in words)
             {
-                var pair = new Pair<string, int>(word, 1);
-                int index = list.IndexOf(pair);
-                if (index != -1)
+                var pair = list.Find(x => x.Key == word);
+                if (pair != null)
                 {
-                    list[index].Value++;
+                    pair.Value++;
                 }
                 else
                 {
-                    list.Add(pair);
+                    list.Add(new Pair<string, int>(word, 1));
                 }
             }
 
             var p = list.OrderByDescending(x => x.Value);
-            Console.WriteLine("---------List--------");
+            Console.WriteLine();
+            Console.WriteLine("-------------List-------------");
             Console.WriteLine("Count: {0}", list.Count);
-            int i = 0;
-            foreach (var word in p)
+            int i = 1;
+            foreach (var pair in p)
             {
-                if (i < 11)
-                    Console.WriteLine("Word: {0} \t Count: {1}", word.Key, word.Value);
-                else
+                Console.WriteLine("{0}. Word: {1} \t Count: {2}", i, pair.Key, pair.Value);
+                i++;
+                if (i > 10)
                 {
                     break;
                 }
-                i++;
             }
         }
 
 
-        class Pair<Tkey, TValue> : IComparable<Pair<Tkey, TValue>>
-            where Tkey : IComparable<Tkey>
+        class Pair<TKey, TValue> : IComparable<Pair<TKey, TValue>>
+            where TKey : IComparable<TKey>
         {
-            public Tkey Key;
-            public TValue Value;
+            public TKey Key { get; set; }
+            public TValue Value { get; set; }
 
-            public Pair(Tkey key, TValue value)
+            public Pair(TKey key, TValue value)
             {
                 this.Key = key;
                 this.Value = value;
             }
-            public int CompareTo(Pair<Tkey, TValue> other)
+            public int CompareTo(Pair<TKey, TValue> other)
             {
                 return this.Key.CompareTo(other.Key);
             }
