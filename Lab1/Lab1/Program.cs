@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.IO; 
 using System.Diagnostics;
 
@@ -21,7 +22,8 @@ List, Dictionary.
     {
         static void Main()
         {
-            var words = new List<string>(DoWords(ReadFile("WarAndWorld.txt")));
+            var words = new List<string>(DoWords(ReadFileByCharacter("WarAndWorld.txt")));
+
             var watch = new Stopwatch();
             watch.Start();
             UseIDictionary<SortedList<string, int>>(words, "SortedList");
@@ -47,7 +49,7 @@ List, Dictionary.
             Console.WriteLine("Time: {0}", watch.ElapsedMilliseconds);
         }
 
-        static IEnumerable<char> ReadFile(string fileName)
+        static IEnumerable<char> ReadFileByCharacter(string fileName)
         {
             using (var inputFile = new StreamReader(fileName))
             {
@@ -60,22 +62,37 @@ List, Dictionary.
 
         static IEnumerable<string> DoWords(IEnumerable<char> text)
         {
-            var strBuid = new StringBuilder(8); // средняя длина русского слова
+            var strBuilder = new StringBuilder(8); // средняя длина русского слова
             foreach (var symbol in text)
             {
                 var symbolLower = char.ToLower(symbol);
                 if (char.IsLetter(symbolLower))
                 {
-                    strBuid.Append(symbolLower);
+                    strBuilder.Append(symbolLower);
                 }
                 else
                 {
-                    if (strBuid.Length > 0)
+                    if (strBuilder.Length > 0)
                     {
-                        yield return strBuid.ToString();
-                        strBuid.Clear();
+                        yield return strBuilder.ToString();
+                        strBuilder.Clear();
                     }
                 }
+            }
+        }
+
+        static IEnumerable<string> DoWordsRegex(IEnumerable<char> text)
+        {
+            var strBuilder = new StringBuilder();
+            foreach (var symbol in text)
+            {
+                strBuilder.Append(symbol);
+            }
+            Regex regex = new Regex(@"\p{L}+", RegexOptions.IgnoreCase); //L - Все буквенные символы. 
+            var matches = regex.Matches(strBuilder.ToString());
+            foreach (Match match in matches)
+            {
+                yield return match.Value.ToLower();
             }
         }
 
@@ -141,6 +158,11 @@ List, Dictionary.
                 }
             }
         }
+
+        /* если делать через group by, то результат замеров будет не совсем верный, так как
+         в этой операции используется хэш функция. Пруф
+         https://github.com/Microsoft/referencesource/blob/master/System.Core/System/Linq/Enumerable.cs
+         класс Grouping, строка 2298 */
 
 
         class Pair<TKey, TValue> : IComparable<Pair<TKey, TValue>>
