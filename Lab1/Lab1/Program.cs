@@ -106,8 +106,13 @@ namespace Lab1
             Console.WriteLine();
             Console.WriteLine($"-----------------{nameDataStruct}-----------------------");
             Console.WriteLine("Count: {0}", iDict.Count);
+            PrintTheFirstTen(p);
+        }
+
+        static void PrintTheFirstTen(IOrderedEnumerable<KeyValuePair<string, int>> pairs)
+        {
             int i = 1;
-            foreach (var pair in p)
+            foreach (var pair in pairs)
             {
                 Console.WriteLine("{0}. Word: {1} \t Count: {2}", i, pair.Key, pair.Value);
                 i++;
