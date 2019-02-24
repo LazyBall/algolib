@@ -130,7 +130,7 @@ namespace Trees
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             throw new NotImplementedException();
-        }
+        }      
 
         public bool Remove(TKey key)
         {
@@ -141,7 +141,7 @@ namespace Trees
             }
             else
             {
-                // Случай 1: Если нет детей справа, левый ребенок встает на место удаляемого.
+                // Случай 1: Если у current нет детей справа, левый ребенок встает на место удаляемого
                 if (current.Right == null)
                 {
                     if (parent == null)
@@ -150,7 +150,7 @@ namespace Trees
                     }
                     else
                     {
-                        // Смотрим, какой current: левый или правый
+                        // Смотрим, какой current: левый или правый сын parent
                         int compResult = parent.Key.CompareTo(current.Key);
                         if (compResult > 0)
                         {
@@ -166,7 +166,7 @@ namespace Trees
                         }
                     }
                 }
-                // Случай 2: Если у правого ребенка нет детей слева 
+                // Случай 2: Если у правого ребенка current нет детей слева 
                 // то он занимает место удаляемого узла. 
                 else if (current.Right.Left == null)
                 {
@@ -204,10 +204,11 @@ namespace Trees
                         leftMostParent = leftMost;
                         leftMost = leftMost.Left;
                     }
-                    // Левое поддерево родителя становится правым поддеревом крайнего левого узла. 
+                    // Правое поддерево самого левого узла становится левым поддеревом родителя
+                    // самого левого узла 
                     leftMostParent.Left = leftMost.Right;
                     // Левый и правый ребенок текущего узла становится левым и правым ребенком 
-                    //крайнего левого.
+                    // крайнего левого
                     leftMost.Left = current.Left;
                     leftMost.Right = current.Right;
                     if (parent == null)
