@@ -129,8 +129,22 @@ namespace Trees
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            throw new NotImplementedException();
-        }      
+            var list = new List<KeyValuePair<TKey, TValue>>(Count);
+            Traverse(Root, list);
+            foreach (var elem in list)
+                yield return elem;
+        }
+        
+        private void Traverse(Node<TKey,TValue> node,
+            List<KeyValuePair<TKey, TValue>> list)
+        {
+            if(node!=null)
+            {
+                Traverse(node.Left, list);
+                list.Add(new KeyValuePair<TKey, TValue>(node.Key, node.Value));
+                Traverse(node.Right, list);
+            }
+        }
 
         public bool Remove(TKey key)
         {
@@ -274,7 +288,7 @@ namespace Trees
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return GetEnumerator();
         }
     }
 }
