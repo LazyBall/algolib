@@ -9,24 +9,7 @@ namespace Trees
 {
     public class BinaryTree<TKey, TValue>: IDictionary<TKey, TValue>
         where TKey:IComparable<TKey>
-    {
-        private class Node<NodeTKey, NodeTValue>
-        {
-            public NodeTKey Key { get; private set; }
-            public NodeTValue Value { get; private set; }
-            public Node<NodeTKey, NodeTValue> Left { get; set; }
-            public Node<NodeTKey, NodeTValue> Right { get; set; }
-
-            public Node(NodeTKey key, NodeTValue value, Node<NodeTKey, NodeTValue> right = null,
-                Node<NodeTKey, NodeTValue> left = null)
-            {
-                this.Key = key;
-                this.Value = value;
-                this.Left = left;
-                this.Right = right;
-            }
-        }
-
+    {       
         public TValue this[TKey key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public int Count { get; private set; }
