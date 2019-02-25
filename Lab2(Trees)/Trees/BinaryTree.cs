@@ -2,25 +2,62 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Trees
 {
-    public class BinaryTree<TKey, TValue>: IDictionary<TKey, TValue>
-        where TKey:IComparable<TKey>
-    {       
-        public TValue this[TKey key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    public class BinaryTree<TKey, TValue> : IDictionary<TKey, TValue>
+        where TKey : IComparable<TKey>
+    {
+        public TValue this[TKey key]
+        {
+            get
+            {
+                if (TryGetValue(key, out TValue value))
+                {
+                    return value;
+                }
+                else
+                {
+                    throw new ArgumentException();
+                }
+            }
+            set
+            {
+                var node = Find(key);
+                if (node == null) throw new ArgumentException();
+                else
+                {
+                    node.Value = value;
+                }
+            }
+        }
 
         public int Count { get; private set; }
 
-        public ICollection<TKey> Keys => throw new NotImplementedException();
+        public ICollection<TKey> Keys
+        {
+            get
+            {
+                var list = new List<TKey>(Count);
+                list.AddRange(from elem in this select elem.Key);
+                return list;
+            }
+        }
 
-        public ICollection<TValue> Values => throw new NotImplementedException();
+        public ICollection<TValue> Values
+        {
+            get
+            {
+                var list = new List<TValue>(Count);
+                list.AddRange(from elem in this select elem.Value);
+                return list;
+            }
+        }
 
-        public bool IsReadOnly => throw new NotImplementedException();
+        public bool IsReadOnly => false;
 
         private Node<TKey,TValue> Root { get; set; }
+
 
 
         public void Add(TKey key, TValue value)
@@ -108,25 +145,41 @@ namespace Trees
 
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            throw new NotImplementedException();
+            if (arrayIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException("Значение параметра arrayIndex меньше 0.");
+            }
+            if(array==null)
+            {
+                throw new ArgumentNullException("Свойство array имеет значение null.");
+            }
+            int i = arrayIndex;
+            foreach (var elem in this)
+            {
+                array[i] = elem;
+                i++;
+                if (i >= array.Length)
+                {
+                    throw new ArgumentException("Число элементов в исходной коллекции ICollection<T> " +
+                        "больше доступного места от положения, заданного значением параметра arrayIndex, " +
+                        "до конца массива назначения array.");
+                }
+            }
         }
 
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+        private IEnumerable<KeyValuePair<TKey, TValue>> Traverse(Node<TKey, TValue> node)
         {
-            var list = new List<KeyValuePair<TKey, TValue>>(Count);
-            Traverse(Root, list);
-            foreach (var elem in list)
-                yield return elem;
-        }
-        
-        private void Traverse(Node<TKey,TValue> node,
-            List<KeyValuePair<TKey, TValue>> list)
-        {
-            if(node!=null)
+            if (node != null)
             {
-                Traverse(node.Left, list);
-                list.Add(new KeyValuePair<TKey, TValue>(node.Key, node.Value));
-                Traverse(node.Right, list);
+                foreach (var elem in Traverse(node.Left))
+                {
+                    yield return elem;
+                }
+                yield return (new KeyValuePair<TKey, TValue>(node.Key, node.Value));
+                foreach (var elem in Traverse(node.Right))
+                {
+                    yield return elem;
+                }
             }
         }
 
@@ -152,9 +205,9 @@ namespace Trees
             return current;
         }
 
-        public bool Remove(TKey key)
+        private bool RemoveNode(Node<TKey, TValue> node)
         {
-            var current = Find(key);
+            var current = node;
             if (current == null)
             {
                 return false;
@@ -170,7 +223,7 @@ namespace Trees
                     }
                     else
                     {
-                        // Смотрим, какой current: левый или правый сын parent
+                        // Смотрим, какой current: левый или правый сын Parent
                         int compResult = current.Parent.Key.CompareTo(current.Key);
                         if (compResult > 0)
                         {
@@ -255,12 +308,16 @@ namespace Trees
             return true;
         }
 
-        //TODO два раза вызывается метод Find. Нужно либо реализовать метод удаления
-        // принимающий сам узел, либоне реализовывать этот.
+        public bool Remove(TKey key)
+        {
+            var current = Find(key);
+            return RemoveNode(current);
+        }
+
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             bool resultRemoving = true;
-            var current = Find(item.Key);           
+            var current = Find(item.Key);
             if (current == null)
             {
                 resultRemoving = false;
@@ -274,23 +331,41 @@ namespace Trees
                 else
                 {
                     resultRemoving = item.Value.Equals(current.Value);
-                }              
+                }
             }
-            if(resultRemoving)
+            if (resultRemoving)
             {
-                resultRemoving = Remove(item.Key);
+                resultRemoving = RemoveNode(current);
             }
             return resultRemoving;
         }
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            throw new NotImplementedException();
+            var node = Find(key);
+            if (node == null)
+            {
+                value = default(TValue);
+                return false;
+            }
+            else
+            {
+                value = node.Value;
+                return true;
+            }
+        }
+
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+        {
+            foreach (var elem in Traverse(Root))
+            {
+                yield return elem;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }
+        }    
     }
 }
