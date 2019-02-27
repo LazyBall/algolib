@@ -238,12 +238,20 @@ namespace Trees
                             current.Parent.Right = current.Left;
                         }
                     }
+                    if (current.Left != null)
+                    {
+                        current.Left.Parent = current.Parent;
+                    }
                 }
                 // Случай 2: Если у правого ребенка current нет детей слева 
                 // то он занимает место удаляемого узла. 
                 else if (current.Right.Left == null)
                 {
                     current.Right.Left = current.Left;
+                    if (current.Left != null)
+                    {
+                        current.Left.Parent = current.Right;
+                    }
                     if (current.Parent == null)
                     {
                         Root = current.Right;
@@ -264,6 +272,7 @@ namespace Trees
                             current.Parent.Right = current.Right;
                         }
                     }
+                    current.Right.Parent = current.Parent;                
                 }
                 // Случай 3: Если у правого ребенка есть дети слева, крайний левый ребенок 
                 // из правого поддерева заменяет удаляемый узел. 
@@ -278,10 +287,22 @@ namespace Trees
                     // Правое поддерево самого левого узла становится левым поддеревом родителя
                     // самого левого узла 
                     leftMost.Parent.Left = leftMost.Right;
+                    if (leftMost.Right != null)
+                    {
+                        leftMost.Right.Parent = leftMost.Parent;
+                    }
                     // Левый и правый ребенок текущего узла становится левым и правым ребенком 
                     // крайнего левого
                     leftMost.Left = current.Left;
+                    if(current.Left!=null)
+                    {
+                        current.Left.Parent = leftMost;
+                    }
                     leftMost.Right = current.Right;
+                    if (current.Right != null)
+                    {
+                        current.Right.Parent = leftMost;
+                    }
                     if (current.Parent == null)
                     {
                         Root = leftMost;
@@ -302,6 +323,7 @@ namespace Trees
                             current.Parent.Right = leftMost;
                         }
                     }
+                    leftMost.Parent = current.Parent;
                 }
             }
             Count--;
