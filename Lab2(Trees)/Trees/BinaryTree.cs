@@ -18,13 +18,18 @@ namespace Trees
                 }
                 else
                 {
-                    throw new ArgumentException();
+                    throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
                 }
             }
             set
             {
-                var node = Find(key);
-                if (node == null) throw new ArgumentException();
+                var node = FindWithParent(key, out Node<TKey, TValue> parent);
+                if (node == null)
+                {
+                    throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
+                }
                 else
                 {
                     node.Value = value;
@@ -62,26 +67,28 @@ namespace Trees
 
         public void Add(TKey key, TValue value)
         {
+            CheckKey(key);
             Node<TKey, TValue> parentCurrent = null;
             var current = Root;
             while (current != null)
             {
                 parentCurrent = current;
-                int compResult = current.Key.CompareTo(key);
-                if (compResult > 0)
+                int comparisonResult = current.Key.CompareTo(key);
+                if (comparisonResult > 0)
                 {
                     current = current.Left;
                 }
-                else if (compResult < 0)
+                else if (comparisonResult < 0)
                 {
                     current = current.Right;
                 }
                 else
                 {
-                    throw new ArgumentException();
+                    throw new ArgumentException
+                        ("An element with the same key already exists in the BinaryTree<TKey,TValue>.");
                 }
             }
-            current = new Node<TKey, TValue>(key, value, parent: parentCurrent);
+            current = new Node<TKey, TValue>(key, value);
             if (parentCurrent == null)
             {
                 Root = current;
@@ -113,7 +120,7 @@ namespace Trees
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
-            var current = Find(item.Key);
+            var current = FindWithParent(item.Key, out Node<TKey, TValue> parent);
             if (current == null)
             {
                 return false;
@@ -133,7 +140,7 @@ namespace Trees
 
         public bool ContainsKey(TKey key)
         {
-            if (Find(key) == null)
+            if (FindWithParent(key, out Node<TKey, TValue> parent) == null)
             {
                 return false;
             }
@@ -147,11 +154,11 @@ namespace Trees
         {
             if (arrayIndex < 0)
             {
-                throw new ArgumentOutOfRangeException("Значение параметра arrayIndex меньше 0.");
+                throw new ArgumentOutOfRangeException("arrayIndex is less than 0.");
             }
             if(array==null)
             {
-                throw new ArgumentNullException("Свойство array имеет значение null.");
+                throw new ArgumentNullException("array is null.");
             }
             int i = arrayIndex;
             foreach (var elem in this)
@@ -160,9 +167,10 @@ namespace Trees
                 i++;
                 if (i >= array.Length)
                 {
-                    throw new ArgumentException("Число элементов в исходной коллекции ICollection<T> " +
-                        "больше доступного места от положения, заданного значением параметра arrayIndex, " +
-                        "до конца массива назначения array.");
+                    throw new ArgumentException("The number of elements in the source " +
+                        "BinaryTree<TKey,TValue> " +
+                        "is greater than the available space from index to the end of the " +
+                        "destination array.");
                 }
             }
         }
@@ -183,31 +191,37 @@ namespace Trees
             }
         }
 
-        private Node<TKey, TValue> Find(TKey key)
+        private Node<TKey, TValue> FindWithParent(TKey key, out Node<TKey, TValue> parent)
         {
+            CheckKey(key);
+            parent = null;
             var current = Root;
             while (current != null)
-            {
-                int compResult = current.Key.CompareTo(key);
-                if (compResult > 0)
+            {              
+                int comparisonResult = current.Key.CompareTo(key);
+                Node<TKey, TValue> next;
+                if (comparisonResult > 0)
                 {
-                    current = current.Left;
+                    next = current.Left;
                 }
-                else if (compResult < 0)
+                else if (comparisonResult < 0)
                 {
-                    current = current.Right;
+                    next = current.Right;
                 }
                 else
                 {
                     return current;
                 }
+                parent = current;
+                current = next;
             }
-            return current;
+            return null;
         }
 
-        private bool RemoveNode(Node<TKey, TValue> node)
+        private bool RemoveNode(Node<TKey, TValue> node, Node<TKey, TValue> nodeParent)
         {
             var current = node;
+            var currentParent = nodeParent;
             if (current == null)
             {
                 return false;
@@ -217,30 +231,26 @@ namespace Trees
                 // Случай 1: Если у current нет детей справа, левый ребенок встает на место удаляемого
                 if (current.Right == null)
                 {
-                    if (current.Parent == null)
+                    if (currentParent == null)
                     {
                         Root = current.Left;
                     }
                     else
                     {
                         // Смотрим, какой current: левый или правый сын Parent
-                        int compResult = current.Parent.Key.CompareTo(current.Key);
+                        int compResult = currentParent.Key.CompareTo(current.Key);
                         if (compResult > 0)
                         {
                             // Если key родителя больше текущего,
                             // левый ребенок current становится левым ребенком родителя.
-                            current.Parent.Left = current.Left;
+                            currentParent.Left = current.Left;
                         }
                         else if (compResult < 0)
                         {
                             // Если key родителя меньше текущего, 
                             // левый ребенок current становится правым ребенком родителя. 
-                            current.Parent.Right = current.Left;
+                            currentParent.Right = current.Left;
                         }
-                    }
-                    if (current.Left != null)
-                    {
-                        current.Left.Parent = current.Parent;
                     }
                 }
                 // Случай 2: Если у правого ребенка current нет детей слева 
@@ -248,82 +258,68 @@ namespace Trees
                 else if (current.Right.Left == null)
                 {
                     current.Right.Left = current.Left;
-                    if (current.Left != null)
-                    {
-                        current.Left.Parent = current.Right;
-                    }
-                    if (current.Parent == null)
+                    if (currentParent == null)
                     {
                         Root = current.Right;
                     }
                     else
                     {
-                        int compResult = current.Parent.Key.CompareTo(current.Key);
+                        int compResult = currentParent.Key.CompareTo(current.Key);
                         if (compResult > 0)
                         {
                             // Если key родителя больше текущего,
                             // правый ребенок current становится левым ребенком родителя.
-                            current.Parent.Left = current.Right;
+                            currentParent.Left = current.Right;
                         }
                         else if (compResult < 0)
                         {
                             // Если key родителя меньше текущего, 
                             // правый ребенок current становится правым ребенком родителя.
-                            current.Parent.Right = current.Right;
+                            currentParent.Right = current.Right;
                         }
-                    }
-                    current.Right.Parent = current.Parent;                
+                    }             
                 }
                 // Случай 3: Если у правого ребенка есть дети слева, крайний левый ребенок 
                 // из правого поддерева заменяет удаляемый узел. 
                 else
                 {
                     // Найдем крайний левый узел. 
-                    var leftMost = current.Right.Left;
-                    while (leftMost.Left != null)
+                    var leftmost = current.Right.Left;
+                    var parentLeftmost = current.Right;
+                    while (leftmost.Left != null)
                     {
-                        leftMost = leftMost.Left;
+                        parentLeftmost = leftmost;
+                        leftmost = leftmost.Left;
                     }
+
                     // Правое поддерево самого левого узла становится левым поддеревом родителя
                     // самого левого узла 
-                    leftMost.Parent.Left = leftMost.Right;
-                    if (leftMost.Right != null)
-                    {
-                        leftMost.Right.Parent = leftMost.Parent;
-                    }
+                    parentLeftmost.Left = leftmost.Right;
+
                     // Левый и правый ребенок текущего узла становится левым и правым ребенком 
                     // крайнего левого
-                    leftMost.Left = current.Left;
-                    if(current.Left!=null)
+                    leftmost.Left = current.Left;
+                    leftmost.Right = current.Right;
+                    if (currentParent == null)
                     {
-                        current.Left.Parent = leftMost;
-                    }
-                    leftMost.Right = current.Right;
-                    if (current.Right != null)
-                    {
-                        current.Right.Parent = leftMost;
-                    }
-                    if (current.Parent == null)
-                    {
-                        Root = leftMost;
+                        Root = leftmost;
                     }
                     else
                     {
-                        int result = current.Parent.Key.CompareTo(current.Key);
+                        int result = currentParent.Key.CompareTo(current.Key);
                         if (result > 0)
                         {
                             // Если значение родителя больше текущего,
                             // крайний левый узел становится левым ребенком родителя.
-                            current.Parent.Left = leftMost;
+                            currentParent.Left = leftmost;
                         }
                         else if (result < 0)
                         {
                             // Если значение родителя меньше текущего,
                             // крайний левый узел становится правым ребенком родителя.
-                            current.Parent.Right = leftMost;
+                            currentParent.Right = leftmost;
                         }
                     }
-                    leftMost.Parent = current.Parent;
                 }
             }
             Count--;
@@ -332,14 +328,14 @@ namespace Trees
 
         public bool Remove(TKey key)
         {
-            var current = Find(key);
-            return RemoveNode(current);
+            var current = FindWithParent(key, out Node<TKey, TValue> parent);
+            return RemoveNode(current, parent);
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             bool resultRemoving = true;
-            var current = Find(item.Key);
+            var current = FindWithParent(item.Key, out Node<TKey, TValue> parent);
             if (current == null)
             {
                 resultRemoving = false;
@@ -357,14 +353,14 @@ namespace Trees
             }
             if (resultRemoving)
             {
-                resultRemoving = RemoveNode(current);
+                resultRemoving = RemoveNode(current, parent);
             }
             return resultRemoving;
         }
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            var node = Find(key);
+            var node = FindWithParent(key, out Node<TKey, TValue> parent);
             if (node == null)
             {
                 value = default(TValue);
@@ -377,9 +373,31 @@ namespace Trees
             }
         }
 
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal()
+        {
+                Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
+                var current = Root;
+
+                while (current != null || stack.Count > 0)
+                {
+
+                    while (current != null)
+                    {
+                        stack.Push(current);
+                        current = current.Left;
+                    }
+  
+                    current = stack.Pop();
+
+                    yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+
+                    current = current.Right;
+                }            
+        }
+
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            foreach (var elem in Traverse(Root))
+            foreach (var elem in DoInorderTraversal())
             {
                 yield return elem;
             }
@@ -388,6 +406,14 @@ namespace Trees
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
-        }    
+        }
+
+        private void CheckKey(TKey key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is null.");
+            }
+        }
     }
 }
