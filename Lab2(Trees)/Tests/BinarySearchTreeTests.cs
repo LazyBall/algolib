@@ -6,13 +6,13 @@ using Trees;
 namespace Tests
 {
     [TestClass]
-    public class BinaryTreeTests
+    public class BinarySearchTreeTests
     {
         [TestMethod]
         public void TestCountWhenAdd()
         {
             int n = 100;
-            var bin = new BinaryTree<int, int>();
+            var bin = new BinarySearchTree<int, int>();
             for (int i = 0; i < n; i++)
             {
                 bin.Add(i, i);
@@ -24,7 +24,7 @@ namespace Tests
         public void TestCountWhenRemove()
         {
             int n = 100, r = 10;
-            var bin = new BinaryTree<int, int>();
+            var bin = new BinarySearchTree<int, int>();
             for (int i = 0; i < n; i++)
             {
                 bin.Add(i, i);
@@ -39,7 +39,7 @@ namespace Tests
         [TestMethod]
         public void TestRemoveWhenRightIsNull()
         {
-            var bin = new BinaryTree<int, int>
+            var bin = new BinarySearchTree<int, int>
             {
                 new KeyValuePair<int, int>(8,1),
                 new KeyValuePair<int, int>(10,1),
@@ -53,7 +53,7 @@ namespace Tests
         [TestMethod]
         public void TestRemoveWhenRightLeftIsNull()
         {
-            var bin = new BinaryTree<int, int>
+            var bin = new BinarySearchTree<int, int>
             {
                 new KeyValuePair<int, int>(8,1),
                 new KeyValuePair<int, int>(10,1),
@@ -69,7 +69,7 @@ namespace Tests
         [TestMethod]
         public void TestRemove()
         {
-            var bin = new BinaryTree<int, int>
+            var bin = new BinarySearchTree<int, int>
             {
                 new KeyValuePair<int, int>(8,1),
                 new KeyValuePair<int, int>(10,1),

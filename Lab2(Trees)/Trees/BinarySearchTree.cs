@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Trees
 {
-    public class BinaryTree<TKey, TValue> : IDictionary<TKey, TValue>
+    public class BinarySearchTree<TKey, TValue> : IDictionary<TKey, TValue>
         where TKey : IComparable<TKey>
     {
         public TValue this[TKey key]
