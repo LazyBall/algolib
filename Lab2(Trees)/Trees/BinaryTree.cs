@@ -373,10 +373,10 @@ namespace Trees
             }
         }
 
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal()
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey,TValue> node)
         {
                 Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
-                var current = Root;
+                var current = node;
 
                 while (current != null || stack.Count > 0)
                 {
@@ -397,7 +397,7 @@ namespace Trees
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            foreach (var elem in DoInorderTraversal())
+            foreach (var elem in DoInorderTraversal(Root))
             {
                 yield return elem;
             }
