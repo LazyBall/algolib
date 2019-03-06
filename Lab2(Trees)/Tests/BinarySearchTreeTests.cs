@@ -87,24 +87,35 @@ namespace Tests
         [TestMethod]
         public void TestAdd()
         {
-            int n = 1000000;
-            var random = new Random(DateTime.Now.Millisecond);
-            var hash = new HashSet<int>();
+            int n = 1000;
             var bin = new BinarySearchTree<int, int>();
             for(int i=0; i<n; i++)
             {
-                var key = random.Next();
-                hash.Add(key);
-                if(!bin.ContainsKey(key))
-                {
-                    bin.Add(key, key);
-                }
+                bin.Add(i, i);
             }
-            foreach(var key in hash)
+            Assert.AreEqual(true, bin.ContainsKey(n / 2));
+        }
+
+        [TestMethod]
+        public void TestTraversal()
+        {
+            int n = 10000;
+            var random = new Random(DateTime.Now.Millisecond);
+            var sortDict = new SortedDictionary<int, int>();
+            var bin = new BinarySearchTree<int, int>();
+            for (int i = 0; i < n; i++)
             {
-                bin.Remove(key);
+                var value = random.Next();
+                if(!sortDict.ContainsKey(value))
+                {
+                    sortDict.Add(value, value);
+                }
+                if(!bin.ContainsKey(value))
+                {
+                    bin.Add(value, value);
+                }               
             }
-            CollectionAssert.AreEqual(new List<int>(), (ICollection)bin.Keys);
+            CollectionAssert.AreEqual(sortDict.Keys, (ICollection)bin.Keys);
         }
     }
 }

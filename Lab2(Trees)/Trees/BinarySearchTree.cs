@@ -104,7 +104,7 @@ namespace Trees
                 else
                 {
                     throw new ArgumentException
-                        ("An element with the same key already exists in the BinaryTree<TKey,TValue>.");
+                        ("An element with the same key already exists in the BinarySearchTree<TKey,TValue>.");
                 }
             }
             current = new Node<TKey, TValue>(key, value);
