@@ -9,8 +9,8 @@ namespace Trees
         public Node<TKey, TValue> Left { get; set; }
         public Node<TKey, TValue> Right { get; set; }
 
-        public Node(TKey key, TValue value, Node<TKey, TValue> right = null,
-            Node<TKey, TValue> left = null)
+
+        public Node(TKey key, TValue value, Node<TKey, TValue> right = null, Node<TKey, TValue> left = null)
         {
             this.Key = key;
             this.Value = value;

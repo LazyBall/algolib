@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Collections;
 using Trees;
@@ -11,7 +12,7 @@ namespace Tests
         [TestMethod]
         public void TestCountWhenAdd()
         {
-            int n = 100;
+            int n = 1000;
             var bin = new BinarySearchTree<int, int>();
             for (int i = 0; i < n; i++)
             {
@@ -23,7 +24,7 @@ namespace Tests
         [TestMethod]
         public void TestCountWhenRemove()
         {
-            int n = 100, r = 10;
+            int n = 10000, r = 1000;
             var bin = new BinarySearchTree<int, int>();
             for (int i = 0; i < n; i++)
             {
@@ -47,7 +48,7 @@ namespace Tests
                 new KeyValuePair<int, int>(2,10),
             };
             bin.Remove(5);
-            CollectionAssert.AreEqual(new int[] { 2, 8, 10 }, (ICollection) bin.Keys);
+            CollectionAssert.AreEqual(new int[] { 2, 8, 10 }, (ICollection)bin.Keys);
         }
 
         [TestMethod]
@@ -66,6 +67,7 @@ namespace Tests
             CollectionAssert.AreEqual(new int[] { 2,6,7, 8, 10 }, (ICollection)bin.Keys);
         }
 
+
         [TestMethod]
         public void TestRemove()
         {
@@ -80,6 +82,29 @@ namespace Tests
             };
             bin.Remove(5);
             CollectionAssert.AreEqual(new int[] { 2, 6, 7, 8, 10 }, (ICollection)bin.Keys);
-        }      
+        }
+
+        [TestMethod]
+        public void TestAdd()
+        {
+            int n = 1000000;
+            var random = new Random(DateTime.Now.Millisecond);
+            var hash = new HashSet<int>();
+            var bin = new BinarySearchTree<int, int>();
+            for(int i=0; i<n; i++)
+            {
+                var key = random.Next();
+                hash.Add(key);
+                if(!bin.ContainsKey(key))
+                {
+                    bin.Add(key, key);
+                }
+            }
+            foreach(var key in hash)
+            {
+                bin.Remove(key);
+            }
+            CollectionAssert.AreEqual(new List<int>(), (ICollection)bin.Keys);
+        }
     }
 }

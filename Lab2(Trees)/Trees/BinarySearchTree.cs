@@ -63,7 +63,26 @@ namespace Trees
 
         private Node<TKey,TValue> Root { get; set; }
 
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTreeWalk(Node<TKey, TValue> node)
+        {
+            Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
+            var current = node;
 
+            while (current != null || stack.Count > 0)
+            {
+
+                while (current != null)
+                {
+                    stack.Push(current);
+                    current = current.Left;
+                }
+
+                current = stack.Pop();
+                yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                current = current.Right;
+
+            }
+        }        
 
         public void Add(TKey key, TValue value)
         {
@@ -118,6 +137,18 @@ namespace Trees
             Count = 0;
         }
 
+        public bool ContainsKey(TKey key)
+        {
+            if (FindWithParent(key, out Node<TKey, TValue> parent) == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
             var current = FindWithParent(item.Key, out Node<TKey, TValue> parent);
@@ -138,29 +169,17 @@ namespace Trees
             }
         }
 
-        public bool ContainsKey(TKey key)
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
         {
-            if (FindWithParent(key, out Node<TKey, TValue> parent) == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
-        {
-            if (arrayIndex < 0)
-            {
-                throw new ArgumentOutOfRangeException("arrayIndex is less than 0.");
-            }
-            if(array==null)
+            if (array == null)
             {
                 throw new ArgumentNullException("array is null.");
             }
-            int i = arrayIndex;
+            if (index < 0)
+            {
+                throw new ArgumentOutOfRangeException("index is less than 0.");
+            }           
+            int i = index;
             foreach (var elem in this)
             {
                 array[i] = elem;
@@ -168,25 +187,9 @@ namespace Trees
                 if (i >= array.Length)
                 {
                     throw new ArgumentException("The number of elements in the source " +
-                        "BinaryTree<TKey,TValue> " +
+                        "BinarySearchTree<TKey,TValue> " +
                         "is greater than the available space from index to the end of the " +
                         "destination array.");
-                }
-            }
-        }
-
-        private IEnumerable<KeyValuePair<TKey, TValue>> Traverse(Node<TKey, TValue> node)
-        {
-            if (node != null)
-            {
-                foreach (var elem in Traverse(node.Left))
-                {
-                    yield return elem;
-                }
-                yield return (new KeyValuePair<TKey, TValue>(node.Key, node.Value));
-                foreach (var elem in Traverse(node.Right))
-                {
-                    yield return elem;
                 }
             }
         }
@@ -228,97 +231,58 @@ namespace Trees
             }
             else
             {
-                // Случай 1: Если у current нет детей справа, левый ребенок встает на место удаляемого
-                if (current.Right == null)
+                Node<TKey, TValue> replacement = null; //элемент, который заменит current
+                // Если один из сыновей или оба отсутсвуют, то просто заменяем
+                // удаляемый элемент на существующего сына, или на null, если сыновей нет
+                if (current.Left == null || current.Right == null)
                 {
-                    if (currentParent == null)
-                    {
-                        Root = current.Left;
-                    }
-                    else
-                    {
-                        // Смотрим, какой current: левый или правый сын Parent
-                        int compResult = currentParent.Key.CompareTo(current.Key);
-                        if (compResult > 0)
-                        {
-                            // Если key родителя больше текущего,
-                            // левый ребенок current становится левым ребенком родителя.
-                            currentParent.Left = current.Left;
-                        }
-                        else if (compResult < 0)
-                        {
-                            // Если key родителя меньше текущего, 
-                            // левый ребенок current становится правым ребенком родителя. 
-                            currentParent.Right = current.Left;
-                        }
-                    }
+                    replacement = current.Left ?? current.Right;
                 }
-                // Случай 2: Если у правого ребенка current нет детей слева 
-                // то он занимает место удаляемого узла. 
-                else if (current.Right.Left == null)
-                {
-                    current.Right.Left = current.Left;
-                    if (currentParent == null)
-                    {
-                        Root = current.Right;
-                    }
-                    else
-                    {
-                        int compResult = currentParent.Key.CompareTo(current.Key);
-                        if (compResult > 0)
-                        {
-                            // Если key родителя больше текущего,
-                            // правый ребенок current становится левым ребенком родителя.
-                            currentParent.Left = current.Right;
-                        }
-                        else if (compResult < 0)
-                        {
-                            // Если key родителя меньше текущего, 
-                            // правый ребенок current становится правым ребенком родителя.
-                            currentParent.Right = current.Right;
-                        }
-                    }             
-                }
-                // Случай 3: Если у правого ребенка есть дети слева, крайний левый ребенок 
-                // из правого поддерева заменяет удаляемый узел. 
+                // Если оба сына есть, то ищем элемент, который будет следующим после current
+                // при обходе дерева (successor) и заменяем им текущий узел
                 else
                 {
-                    // Найдем крайний левый узел. 
-                    var leftmost = current.Right.Left;
-                    var parentLeftmost = current.Right;
-                    while (leftmost.Left != null)
+                    var successor = current.Right;
+                    Node<TKey, TValue> successorParent = null;
+
+                    while (successor.Left != null)
                     {
-                        parentLeftmost = leftmost;
-                        leftmost = leftmost.Left;
+                        successorParent = successor;
+                        successor = successor.Left;
                     }
 
-                    // Правое поддерево самого левого узла становится левым поддеревом родителя
-                    // самого левого узла 
-                    parentLeftmost.Left = leftmost.Right;
-
-                    // Левый и правый ребенок текущего узла становится левым и правым ребенком 
-                    // крайнего левого
-                    leftmost.Left = current.Left;
-                    leftmost.Right = current.Right;
-                    if (currentParent == null)
+                    if (successorParent != null)
                     {
-                        Root = leftmost;
+                        successorParent.Left = successor.Right;
                     }
                     else
                     {
-                        int result = currentParent.Key.CompareTo(current.Key);
-                        if (result > 0)
-                        {
-                            // Если значение родителя больше текущего,
-                            // крайний левый узел становится левым ребенком родителя.
-                            currentParent.Left = leftmost;
-                        }
-                        else if (result < 0)
-                        {
-                            // Если значение родителя меньше текущего,
-                            // крайний левый узел становится правым ребенком родителя.
-                            currentParent.Right = leftmost;
-                        }
+                        current.Right = current.Right.Right;
+                    }
+
+                    replacement = successor;
+                    replacement.Left = current.Left;
+                    replacement.Right = current.Right;
+                }
+                if (currentParent == null)
+                {
+                    Root = replacement;
+                }
+                else
+                {
+                    // Смотрим, какой current: левый или правый сын currentParent
+                    int compResult = currentParent.Key.CompareTo(current.Key);
+                    if (compResult > 0)
+                    {
+                        // Если key родителя больше текущего,
+                        // replacement становится левым ребенком родителя.
+                        currentParent.Left = replacement;
+                    }
+                    else if (compResult < 0)
+                    {
+                        // Если key родителя меньше текущего, 
+                        // replacement становится правым ребенком родителя. 
+                        currentParent.Right = replacement;
                     }
                 }
             }
@@ -334,28 +298,28 @@ namespace Trees
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
-            bool resultRemoving = true;
+            bool found = true;
             var current = FindWithParent(item.Key, out Node<TKey, TValue> parent);
             if (current == null)
             {
-                resultRemoving = false;
+                found = false;
             }
             else
             {
                 if (item.Value is IComparable<TValue> compValue)
                 {
-                    resultRemoving = (compValue.CompareTo(current.Value) == 0);
+                    found = (compValue.CompareTo(current.Value) == 0);
                 }
                 else
                 {
-                    resultRemoving = item.Value.Equals(current.Value);
+                    found = item.Value.Equals(current.Value);
                 }
             }
-            if (resultRemoving)
+            if (found)
             {
-                resultRemoving = RemoveNode(current, parent);
+                found = RemoveNode(current, parent);
             }
-            return resultRemoving;
+            return found;
         }
 
         public bool TryGetValue(TKey key, out TValue value)
@@ -373,31 +337,9 @@ namespace Trees
             }
         }
 
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey,TValue> node)
-        {
-                Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
-                var current = node;
-
-                while (current != null || stack.Count > 0)
-                {
-
-                    while (current != null)
-                    {
-                        stack.Push(current);
-                        current = current.Left;
-                    }
-  
-                    current = stack.Pop();
-
-                    yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
-
-                    current = current.Right;
-                }            
-        }
-
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            foreach (var elem in DoInorderTraversal(Root))
+            foreach (var elem in DoInorderTreeWalk(Root))
             {
                 yield return elem;
             }
