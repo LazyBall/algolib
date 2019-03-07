@@ -257,7 +257,7 @@ namespace Trees
                     }
                     else
                     {
-                        current.Right = current.Right.Right;
+                        current.Right = successor.Right;
                     }
 
                     replacement = successor;
