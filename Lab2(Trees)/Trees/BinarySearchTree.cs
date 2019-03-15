@@ -80,7 +80,6 @@ namespace Trees
                 current = stack.Pop();
                 yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
                 current = current.Right;
-
             }
         }        
 
@@ -132,41 +131,29 @@ namespace Trees
 
         public void Add(TKey key, TValue value)
         {
-            CheckKey(key);
-            Node<TKey, TValue> parentCurrent = null;
-            var current = Root;
-            while (current != null)
+            var current = FindWithParent(key, out Node<TKey, TValue> parentCurrent);
+            if (current != null)
             {
-                parentCurrent = current;
-                int comparisonResult = current.Key.CompareTo(key);
-                if (comparisonResult > 0)
-                {
-                    current = current.Left;
-                }
-                else if (comparisonResult < 0)
-                {
-                    current = current.Right;
-                }
-                else
-                {
-                    throw new ArgumentException
-                        ("An element with the same key already exists in the BinarySearchTree<TKey,TValue>.");
-                }
-            }
-            current = new Node<TKey, TValue>(key, value);
-            if (parentCurrent == null)
-            {
-                Root = current;
+                throw new ArgumentException
+                       ("An element with the same key already exists in the BinarySearchTree<TKey,TValue>.");
             }
             else
             {
-                if (current.Key.CompareTo(parentCurrent.Key) < 0)
+                current = new Node<TKey, TValue>(key, value);
+                if (parentCurrent == null)
                 {
-                    parentCurrent.Left = current;
+                    Root = current;
                 }
                 else
                 {
-                    parentCurrent.Right = current;
+                    if (current.Key.CompareTo(parentCurrent.Key) < 0)
+                    {
+                        parentCurrent.Left = current;
+                    }
+                    else
+                    {
+                        parentCurrent.Right = current;
+                    }
                 }
             }
             Count++;
@@ -224,20 +211,23 @@ namespace Trees
             if (index < 0)
             {
                 throw new ArgumentOutOfRangeException("index is less than 0.");
-            }           
+            }
+            if (array.Length < index + this.Count)
+            {
+                throw new ArgumentException("The number of elements in the source " +
+                        "BinarySearchTree<TKey,TValue> " +
+                        "is greater than the available space from index to the end of the " +
+                        "destination array.");
+            }
+
             int i = index;
+
             foreach (var elem in this)
             {
                 array[i] = elem;
                 i++;
-                if (i >= array.Length)
-                {
-                    throw new ArgumentException("The number of elements in the source " +
-                        "BinarySearchTree<TKey,TValue> " +
-                        "is greater than the available space from index to the end of the " +
-                        "destination array.");
-                }
             }
+
         }
 
         private Node<TKey, TValue> FindWithParent(TKey key, out Node<TKey, TValue> parent)
@@ -248,7 +238,7 @@ namespace Trees
             while (current != null)
             {              
                 int comparisonResult = current.Key.CompareTo(key);
-                Node<TKey, TValue> next;
+                Node<TKey, TValue> next = null;
                 if (comparisonResult > 0)
                 {
                     next = current.Left;
@@ -385,7 +375,7 @@ namespace Trees
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            foreach (var elem in DoMorrisTraversal(Root))
+            foreach (var elem in DoInorderTraversal(Root))
             {
                 yield return elem;
             }

@@ -9,10 +9,76 @@ namespace Tests
     [TestClass]
     public class BinarySearchTreeTests
     {
+        private int GetNumber()
+        {
+            return 1000;
+        }
+
+        private IEnumerable<int> DoRandomValues(int count)
+        {
+            var random = new Random(DateTime.Now.Millisecond);
+            var list = new List<int>(count);
+            for (int i = 0; i < count; i++)
+            {
+                list.Add(random.Next());
+            }
+            return list;
+        }
+
+        [TestMethod]
+        public void TestIndexerByKey()
+        {
+            int n = GetNumber();
+            var randomValues = DoRandomValues(n);
+            var bin = new BinarySearchTree<int, int>();
+
+            foreach (var value in randomValues)
+            {
+                if (!bin.ContainsKey(value))
+                {
+                    bin.Add(value, value);
+                }
+            }
+
+            bool flag = true;
+
+            foreach (var value in randomValues)
+            {
+                flag = flag && (bin[value] == value);
+            }
+
+            Assert.AreEqual(true, flag);
+        }
+
+        [TestMethod]
+        public void TestAdd()
+        {
+            int n = GetNumber();
+            var bin = new BinarySearchTree<int, int>();
+            var randomValues = DoRandomValues(n);
+
+            foreach (var value in randomValues)
+            {
+                if (!bin.ContainsKey(value))
+                {
+                    bin.Add(value, value);
+                }
+            }
+
+            bool flag = true;
+
+            foreach (var value in randomValues)
+            {
+                flag = flag && bin.Contains(new KeyValuePair<int, int>(value, value));
+            }
+
+            Assert.AreEqual(true, flag);
+        }
+
         [TestMethod]
         public void TestCountWhenAdd()
         {
-            int n = 1000;
+            int n = GetNumber();
             var bin = new BinarySearchTree<int, int>();
             for (int i = 0; i < n; i++)
             {
@@ -34,7 +100,7 @@ namespace Tests
             {
                 bin.Remove(i);
             }
-            Assert.AreEqual(n-r, bin.Count);
+            Assert.AreEqual(n - r, bin.Count);
         }
 
         [TestMethod]
@@ -64,7 +130,7 @@ namespace Tests
                 new KeyValuePair<int, int>(7,10)
             };
             bin.Remove(5);
-            CollectionAssert.AreEqual(new int[] { 2,6,7, 8, 10 }, (ICollection)bin.Keys);
+            CollectionAssert.AreEqual(new int[] { 2, 6, 7, 8, 10 }, (ICollection)bin.Keys);
         }
 
 
@@ -73,49 +139,52 @@ namespace Tests
         {
             var bin = new BinarySearchTree<int, int>
             {
-                new KeyValuePair<int, int>(8,1),
-                new KeyValuePair<int, int>(10,1),
-                new KeyValuePair<int, int>(5,1),
-                new KeyValuePair<int, int>(2,10),
-                new KeyValuePair<int, int>(7,10),
-                new KeyValuePair<int, int>(6,10)             
+                { 8, 1 },
+                { 10, 1 },
+                { 5, 1 },
+                { 2, 1 },
+                { 7, 1 },
+                { 6, 1 }
             };
             bin.Remove(5);
             CollectionAssert.AreEqual(new int[] { 2, 6, 7, 8, 10 }, (ICollection)bin.Keys);
         }
 
-        [TestMethod]
-        public void TestAdd()
-        {
-            int n = 1000;
-            var bin = new BinarySearchTree<int, int>();
-            for(int i=0; i<n; i++)
-            {
-                bin.Add(i, i);
-            }
-            Assert.AreEqual(true, bin.ContainsKey(n / 2));
-        }
+
 
         [TestMethod]
         public void TestTraversal()
         {
-            int n = 10000;
+            int n = GetNumber();
             var random = new Random(DateTime.Now.Millisecond);
             var sortDict = new SortedDictionary<int, int>();
             var bin = new BinarySearchTree<int, int>();
             for (int i = 0; i < n; i++)
             {
                 var value = random.Next();
-                if(!sortDict.ContainsKey(value))
+                if (!sortDict.ContainsKey(value))
                 {
                     sortDict.Add(value, value);
                 }
-                if(!bin.ContainsKey(value))
+                if (!bin.ContainsKey(value))
                 {
                     bin.Add(value, value);
-                }               
+                }
             }
             CollectionAssert.AreEqual(sortDict.Keys, (ICollection)bin.Keys);
+        }
+
+        [TestMethod]
+        public void TestAdd1()
+        {
+            var bin = new BinarySearchTree<int, int>
+            {
+                { 2, 2 },
+                { 1, 1 },
+                { 3, 3 },
+                { -1, -1 }
+            };
+            Assert.AreEqual(4, bin.Count);
         }
     }
 }

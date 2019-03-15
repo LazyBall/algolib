@@ -9,19 +9,29 @@ namespace ConsoleApp
     {
         static void Main()
         {
-            int length = 1000000, startDel = 500000, stopDel = 700000;
+            int length = 10000, startDel = 5000, stopDel = 7000, numberOfTests = 10;
             var worker = new Worker();
-            var array = worker.CreateRandomArray(length);
+
+            for (int i = 0; i < numberOfTests; i++)
+            {
+                var array = worker.CreateRandomArray(length);
+                Console.WriteLine("Test: {0}", i + 1);
+                RunBenchmark(worker.TestTree<BinarySearchTree<int, int>>, array, startDel, stopDel,
+                    "BinarySearchTree");
+                RunBenchmark(worker.TestTree<SortedDictionary<int, int>>, array, startDel, stopDel,
+                   "SortedDictionary");
+                Console.WriteLine();
+            }
+        }
+
+        static void RunBenchmark(Action<int[], int, int> action, int[] array,
+            int startDel, int stopDel, string nameDataStruct)
+        {
             var watch = new Stopwatch();
             watch.Start();
-            worker.TestTree<BinarySearchTree<int, int>>(array, startDel, stopDel);
+            action(array, startDel, stopDel);
             watch.Stop();
-            Console.WriteLine($"BinarySearchTree \n Time: {watch.ElapsedMilliseconds} ms.");
-            Console.WriteLine();
-            watch.Restart();
-            worker.TestTree<SortedDictionary<int, int>>(array, startDel, stopDel);
-            watch.Stop();
-            Console.WriteLine($"SortDictionary \n Time: {watch.ElapsedMilliseconds} ms.");
+            Console.WriteLine($"{nameDataStruct} Time: {watch.ElapsedMilliseconds} ms.");
         }
     }
 }
