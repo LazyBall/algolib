@@ -63,7 +63,7 @@ namespace Trees
 
         private Node<TKey,TValue> Root { get; set; }
 
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTreeWalk(Node<TKey, TValue> node)
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey, TValue> node)
         {
             Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
             var current = node;
@@ -83,6 +83,52 @@ namespace Trees
 
             }
         }        
+
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoMorrisTraversal(Node<TKey,TValue> node)
+        {
+            Node<TKey,TValue> current, pre;
+            current = node;
+
+            while (current != null)
+            {
+                if (current.Left == null)
+                {
+                    yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                    current = current.Right;
+                }
+                else
+                {
+                    /* Find the inorder predecessor of current */
+                    pre = current.Left;
+
+                    while (pre.Right != null && pre.Right != current)
+                    {
+                        pre = pre.Right;
+                    }
+
+                    /* Make current as right child  
+                    of its inorder predecessor */
+                    if (pre.Right == null)
+                    {
+                        pre.Right = current;
+                        current = current.Left;
+                    }
+
+                    /* Revert the changes made in  
+                    if part to restore the original  
+                    tree i.e., fix the right child  
+                    of predecssor*/
+                    else
+                    {
+                        pre.Right = null;
+                        yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                        current = current.Right;
+                    } /* End of if condition pre->right == NULL */
+
+                } /* End of if condition current->left == NULL*/
+            }  
+
+        }
 
         public void Add(TKey key, TValue value)
         {
@@ -339,7 +385,7 @@ namespace Trees
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            foreach (var elem in DoInorderTreeWalk(Root))
+            foreach (var elem in DoMorrisTraversal(Root))
             {
                 yield return elem;
             }
