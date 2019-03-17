@@ -8,6 +8,25 @@ namespace Trees
     public class BinarySearchTree<TKey, TValue> : IDictionary<TKey, TValue>
         where TKey : IComparable<TKey>
     {
+
+        private class Node<NTKey, NTValue>
+        {
+            public NTKey Key { get; private set; }
+            public NTValue Value { get; set; }
+            public Node<NTKey, NTValue> Left { get; set; }
+            public Node<NTKey, NTValue> Right { get; set; }
+
+
+            public Node(NTKey key, NTValue value, Node<NTKey, NTValue> left = null,
+                Node<NTKey, NTValue> right = null)
+            {
+                this.Key = key;
+                this.Value = value;
+                this.Left = left;
+                this.Right = right;
+            }
+        }
+
         public TValue this[TKey key]
         {
             get
