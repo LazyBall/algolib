@@ -43,7 +43,7 @@ namespace Trees
             }
             set
             {
-                var node = FindWithParent(key, out Node<TKey, TValue> parent);
+                var node = FindNodeWithParent(key, out Node<TKey, TValue> parent);
                 if (node == null)
                 {
                     throw new KeyNotFoundException
@@ -150,7 +150,7 @@ namespace Trees
 
         public void Add(TKey key, TValue value)
         {
-            var current = FindWithParent(key, out Node<TKey, TValue> parentCurrent);
+            var current = FindNodeWithParent(key, out Node<TKey, TValue> parentCurrent);
             if (current != null)
             {
                 throw new ArgumentException
@@ -191,7 +191,7 @@ namespace Trees
 
         public bool ContainsKey(TKey key)
         {
-            if (FindWithParent(key, out Node<TKey, TValue> parent) == null)
+            if (FindNodeWithParent(key, out Node<TKey, TValue> parent) == null)
             {
                 return false;
             }
@@ -203,7 +203,7 @@ namespace Trees
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
-            var current = FindWithParent(item.Key, out Node<TKey, TValue> parent);
+            var current = FindNodeWithParent(item.Key, out Node<TKey, TValue> parent);
             if (current == null)
             {
                 return false;
@@ -249,7 +249,7 @@ namespace Trees
 
         }
 
-        private Node<TKey, TValue> FindWithParent(TKey key, out Node<TKey, TValue> parent)
+        private Node<TKey, TValue> FindNodeWithParent(TKey key, out Node<TKey, TValue> parent)
         {
             CheckKey(key);
             parent = null;
@@ -347,14 +347,14 @@ namespace Trees
 
         public bool Remove(TKey key)
         {
-            var current = FindWithParent(key, out Node<TKey, TValue> parent);
+            var current = FindNodeWithParent(key, out Node<TKey, TValue> parent);
             return RemoveNode(current, parent);
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             bool found = true;
-            var current = FindWithParent(item.Key, out Node<TKey, TValue> parent);
+            var current = FindNodeWithParent(item.Key, out Node<TKey, TValue> parent);
             if (current == null)
             {
                 found = false;
@@ -379,7 +379,7 @@ namespace Trees
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            var node = FindWithParent(key, out Node<TKey, TValue> parent);
+            var node = FindNodeWithParent(key, out Node<TKey, TValue> parent);
             if (node == null)
             {
                 value = default(TValue);
