@@ -8,34 +8,28 @@ namespace Trees
     public class AVLTree<TKey, TValue> :IDictionary<TKey,TValue>
         where TKey : IComparable<TKey>
     {
-      
+        public int Count { get; private set; }
+
         private class Node<NTKey, NTValue>
         {
             public NTKey Key { get; private set; }
             public NTValue Value { get; set; }
             public Node<NTKey, NTValue> Left { get; set; }
             public Node<NTKey, NTValue> Right { get; set; }
-            public Node<NTKey,NTValue> Parent { get; set; }
-            public byte Height { get; set; }
+            public int Height { get; set; }
 
             public Node(NTKey key, NTValue value, Node<NTKey, NTValue> left = null,
-                Node<NTKey, NTValue> right = null, Node<NTKey, NTValue> parent = null, byte height = 1)
+                Node<NTKey, NTValue> right = null, int height = 1)
             {
                 this.Key = key;
                 this.Value = value;
                 this.Left = left;
                 this.Right = right;
-                this.Parent = parent;
                 this.Height = height;
             }
-         
         }
 
         private Node<TKey, TValue> Root { get; set; }
-
-        public int Height => GetNodeHeight(Root);
-
-        public int Count { get; private set; }
 
         public ICollection<TKey> Keys
         {
@@ -63,16 +57,28 @@ namespace Trees
         {
             get
             {
-                if (TryGetValue(key, out TValue value)) return value;
-                else throw new KeyNotFoundException
+                if (TryGetValue(key, out TValue value))
+                {
+                    return value;
+                }
+                else
+                {
+                    throw new KeyNotFoundException
                         ("The property is retrieved and key does not exist in the collection.");
+                }
             }
             set
             {
                 var node = FindNode(key);
-                if (node == null) throw new KeyNotFoundException
+                if (node == null)
+                {
+                    throw new KeyNotFoundException
                         ("The property is retrieved and key does not exist in the collection.");
-                else node.Value = value;
+                }
+                else
+                {
+                    node.Value = value;
+                }
             }
         }
 
@@ -83,15 +89,17 @@ namespace Trees
 
         private int GetBalancingFactor(Node<TKey, TValue> node)
         {
-            return (node != null) ? (GetNodeHeight(node.Right) - GetNodeHeight(node.Left)) : 0;
+            if (node == null) return 0;
+            return GetNodeHeight(node.Right) - GetNodeHeight(node.Left);
         }
 
-        private void FixNodeHeight(Node<TKey, TValue> node)
+        private Node<TKey,TValue> FixNodeHeight(Node<TKey, TValue> node)
         {
             if (node != null)
             {
-                node.Height = (byte)(Math.Max(GetNodeHeight(node.Left), GetNodeHeight(node.Right)) + 1);
+                node.Height = Math.Max(GetNodeHeight(node.Left), GetNodeHeight(node.Right)) + 1;
             }
+            return node;
         }
 
         private void CheckKey(TKey key)
@@ -127,49 +135,58 @@ namespace Trees
             return null;
         }
 
+        private Node<TKey,TValue> FindNodeWithPath(TKey key, out Stack<Node<TKey,TValue>> path)
+        {
+            CheckKey(key);
+            var current = Root;
+            path = new Stack<Node<TKey, TValue>>(GetNodeHeight(Root) + 2);
+
+            while (current != null)
+            {
+                int comparisonResult = current.Key.CompareTo(key);
+                Node<TKey, TValue> next = null;
+                if (comparisonResult > 0)
+                {
+                    next = current.Left;
+                }
+                else if (comparisonResult < 0)
+                {
+                    next = current.Right;
+                }
+                else
+                {
+                    return current;
+                }
+                path.Push(current);
+                current = next;
+            }
+
+            return null;
+        }
+
         private Node<TKey, TValue> RotateRight(Node<TKey, TValue> node)
         {
-            var q = node.Left;
-            var b = q.Right;
-            node.Left = b;
-            if (b != null) b.Parent = node;
-            q.Right = node;
-            var parentNode = node.Parent;
-            q.Parent = parentNode;
-            node.Parent = q;
-            if (parentNode != null)
-            {
-                if (parentNode.Key.CompareTo(q.Key) > 0) parentNode.Left = q;
-                else parentNode.Right = q;
-            }            
-            FixNodeHeight(node);
-            FixNodeHeight(q);
-            return q;
+            var left = node.Left;
+            node.Left = left.Right;
+            left.Right = node;
+            node=FixNodeHeight(node);
+            left=FixNodeHeight(left);
+            return left;
         }
 
         private Node<TKey, TValue> RotateLeft(Node<TKey, TValue> node)
         {
-            var p = node.Right;
-            var b = p.Left;
-            node.Right = b;
-            if (b != null) b.Parent = node;
-            p.Left = node;
-            var parentNode = node.Parent;
-            p.Parent = parentNode;
-            node.Parent = p;
-            if (parentNode != null)
-            {
-                if (parentNode.Key.CompareTo(p.Key) > 0) parentNode.Left = p;
-                else parentNode.Right = p;
-            }
-            FixNodeHeight(node);
-            FixNodeHeight(p);
-            return p;
+            var right = node.Right;
+            node.Right = right.Left;
+            right.Left = node;
+            node=FixNodeHeight(node);
+            right=FixNodeHeight(right);
+            return right;
         }
 
         private Node<TKey, TValue> Balance(Node<TKey, TValue> node)
         {
-            FixNodeHeight(node);
+            node=FixNodeHeight(node);
             var balanceFactor = GetBalancingFactor(node);
             if (balanceFactor == 2)
             {
@@ -190,21 +207,34 @@ namespace Trees
             return node;
         }
 
-        private Node<TKey, TValue> BalanceToRoot(Node<TKey, TValue> node)
+        private Node<TKey, TValue> BalancePath(Stack<Node<TKey, TValue>> path)
         {
-            if (node == null) return node;
-            var current = node;
-
-            while (current.Parent != null)
+            Node<TKey, TValue> current = null;
+            if (path.Count > 0)
             {
+                current = path.Pop();
                 current = Balance(current);
-                current = current.Parent;
             }
 
-            return Balance(current);
+            while (path.Count > 0)
+            {
+                var parent = path.Pop();
+                int comparisonResult = current.Key.CompareTo(parent.Key);
+                if (comparisonResult < 0)
+                {
+                    parent.Left = current;
+                }
+                else
+                {
+                    parent.Right = current;
+                }
+                current = Balance(parent);
+            }
+
+            return current;
         }
 
-        private bool RemoveNode(Node<TKey,TValue> node)
+        private bool RemoveNode(Node<TKey,TValue> node, Stack<Node<TKey,TValue>> pathToNode)
         {
             var current = node;
             if (current == null)
@@ -213,106 +243,98 @@ namespace Trees
             }
             else
             {
-                Node<TKey, TValue> replacement = null;
-                Node<TKey, TValue> balanceFrom = null;
-
+                Node<TKey, TValue> replacement = null; //элемент, который заменит current
+                // Если один из сыновей или оба отсутсвуют, то просто заменяем
+                // удаляемый элемент на существующего сына, или на null, если сыновей нет
                 if (current.Left == null || current.Right == null)
                 {
                     replacement = current.Left ?? current.Right;
-                    balanceFrom = current.Parent;
                 }
+                // Если оба сына есть, то ищем элемент, который будет следующим после current
+                // при обходе дерева (successor) и заменяем им текущий узел
                 else
                 {
                     var successor = current.Right;
-                    Node<TKey, TValue> parentSuccessor = null;
+                    var stackSuccessor = new Stack<Node<TKey, TValue>>(GetNodeHeight(Root)
+                        - pathToNode.Count + 2);
 
                     while (successor.Left != null)
                     {
-                        parentSuccessor = successor;
+                        stackSuccessor.Push(successor);
                         successor = successor.Left;
                     }
 
-                    if (parentSuccessor!=null)
+                    if (stackSuccessor.Count > 0)
                     {
-                        parentSuccessor.Left = successor.Right;
-                        if (successor.Right != null) successor.Right.Parent = parentSuccessor;
+                        stackSuccessor.Peek().Left = successor.Right;
                     }
                     else
                     {
                         current.Right = successor.Right;
-                        if (successor.Right != null) successor.Right.Parent = current;
                     }
-                   
+
                     replacement = successor;
                     replacement.Left = current.Left;
-                    current.Left.Parent = replacement;
                     replacement.Right = current.Right;
-                    if(current.Right!=null) current.Right.Parent = replacement;
-                    balanceFrom = parentSuccessor ?? replacement;
-                }
-                if (replacement != null) replacement.Parent = current.Parent;
-                if(current.Parent!=null)
-                {
-                    var comparisonResult = current.Parent.Key.CompareTo(current.Key);
-                    if(comparisonResult>0)
+                    pathToNode.Push(replacement);
+
+                    var replacementChild = BalancePath(stackSuccessor);
+                    if (replacementChild != null)
                     {
-                        current.Parent.Left = replacement;
+                        pathToNode.Push(replacementChild);
                     }
-                    else
-                    {
-                        current.Parent.Right = replacement;
-                    }
+
                 }
-                Root = BalanceToRoot(balanceFrom);
+                Root = BalancePath(pathToNode);
             }
             Count--;
             return true;
         }
 
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey, TValue> node)
+        {
+            Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
+            var current = node;
+
+            while (current != null || stack.Count > 0)
+            {
+
+                while (current != null)
+                {
+                    stack.Push(current);
+                    current = current.Left;
+                }
+
+                current = stack.Pop();
+                yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                current = current.Right;
+            }
+        }
+
         public void Add(TKey key, TValue value)
         {
             CheckKey(key);
-            var current = Root;
-            Node<TKey, TValue> parentCurrent = null;
-
-            while (current != null)
+            var current = FindNodeWithPath(key, out Stack<Node<TKey, TValue>> stack);
+            if (current != null)
             {
-                int comparisonResult = current.Key.CompareTo(key);
-                Node<TKey, TValue> next = null;
-                if (comparisonResult > 0)
-                {
-                    next = current.Left;
-                }
-                else if (comparisonResult < 0)
-                {
-                    next = current.Right;
-                }
-                else
-                {
-                    throw new ArgumentException
-                     ("An element with the same key already exists in the AVLTree<TKey, TValue>.");
-                }
-                parentCurrent = current;
-                current = next;
+                throw new ArgumentException
+                      ("An element with the same key already exists in the AVLTree<TKey, TValue>.");
             }
-            current = new Node<TKey, TValue>(key, value, parent: parentCurrent);
-            if (parentCurrent != null)
-            {
-                if (parentCurrent.Key.CompareTo(current.Key) > 0) parentCurrent.Left = current;
-                else parentCurrent.Right = current;
-            }
-            Root = BalanceToRoot(current);
+            current = new Node<TKey, TValue>(key, value);
+            stack.Push(current);
+            Root = BalancePath(stack);
             Count++;
         }
 
         public bool Remove(TKey key)
         {
-            return RemoveNode(FindNode(key));
+            var current = FindNodeWithPath(key, out Stack<Node<TKey, TValue>> stack);
+            return RemoveNode(current, stack);
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
-            var current = FindNode(item.Key);
+            var current = FindNodeWithPath(item.Key, out Stack<Node<TKey, TValue>> stack);
             bool found = true;
             if (current!=null)
             {
@@ -325,7 +347,7 @@ namespace Trees
                     found = item.Value.Equals(current.Value);
                 }
             }
-            if (found) found = RemoveNode(current);
+            if (found) found = RemoveNode(current, stack);
             return found;
         }
 
@@ -401,26 +423,6 @@ namespace Trees
             {
                 array[i] = elem;
                 i++;
-            }
-        }
-
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey, TValue> node)
-        {
-            Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
-            var current = node;
-
-            while (current != null || stack.Count > 0)
-            {
-
-                while (current != null)
-                {
-                    stack.Push(current);
-                    current = current.Left;
-                }
-
-                current = stack.Pop();
-                yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
-                current = current.Right;
             }
         }
 
