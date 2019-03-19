@@ -134,7 +134,14 @@ namespace Trees
             node.Left = b;
             if (b != null) b.Parent = node;
             q.Right = node;
+            var parentNode = node.Parent;
+            q.Parent = parentNode;
             node.Parent = q;
+            if (parentNode != null)
+            {
+                if (parentNode.Key.CompareTo(q.Key) > 0) parentNode.Left = q;
+                else parentNode.Right = q;
+            }            
             FixNodeHeight(node);
             FixNodeHeight(q);
             return q;
@@ -147,7 +154,14 @@ namespace Trees
             node.Right = b;
             if (b != null) b.Parent = node;
             p.Left = node;
+            var parentNode = node.Parent;
+            p.Parent = parentNode;
             node.Parent = p;
+            if (parentNode != null)
+            {
+                if (parentNode.Key.CompareTo(p.Key) > 0) parentNode.Left = p;
+                else parentNode.Right = p;
+            }
             FixNodeHeight(node);
             FixNodeHeight(p);
             return p;
@@ -161,9 +175,7 @@ namespace Trees
             {
                 if (GetBalancingFactor(node.Right) < 0)
                 {
-                    var balanced = RotateRight(node.Right);
-                    balanced.Parent = node;
-                    node.Right = balanced;
+                    node.Right = RotateRight(node.Right);
                 }
                 return RotateLeft(node);
             }
@@ -171,9 +183,7 @@ namespace Trees
             {
                 if (GetBalancingFactor(node.Left) > 0)
                 {
-                    var balanced = RotateLeft(node.Left);
-                    balanced.Parent = node;
-                    node.Left = balanced;
+                    node.Left = RotateLeft(node.Left);
                 }
                 return RotateRight(node);
             }
@@ -187,21 +197,8 @@ namespace Trees
 
             while (current.Parent != null)
             {
-                var parent = current.Parent;
                 current = Balance(current);
-                if (current.Parent != parent)
-                {
-                    current.Parent = parent;
-                    if (parent.Key.CompareTo(current.Key) > 0)
-                    {
-                        parent.Left = current;
-                    }
-                    else
-                    {
-                        parent.Right = current;
-                    }
-                }
-                current = parent;
+                current = current.Parent;
             }
 
             return Balance(current);
@@ -222,7 +219,7 @@ namespace Trees
                 if (current.Left == null || current.Right == null)
                 {
                     replacement = current.Left ?? current.Right;
-                    balanceFrom = replacement;
+                    balanceFrom = current.Parent;
                 }
                 else
                 {
@@ -250,7 +247,7 @@ namespace Trees
                     replacement.Left = current.Left;
                     current.Left.Parent = replacement;
                     replacement.Right = current.Right;
-                    current.Right.Parent = replacement;
+                    if(current.Right!=null) current.Right.Parent = replacement;
                     balanceFrom = parentSuccessor ?? replacement;
                 }
                 if (replacement != null) replacement.Parent = current.Parent;
