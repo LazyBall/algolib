@@ -326,14 +326,13 @@ namespace Trees
                 else
                 {
                     // Смотрим, какой current: левый или правый сын currentParent
-                    int compResult = currentParent.Key.CompareTo(current.Key);
-                    if (compResult > 0)
+                    if (currentParent.Key.CompareTo(current.Key) > 0)
                     {
                         // Если key родителя больше текущего,
                         // replacement становится левым ребенком родителя.
                         currentParent.Left = replacement;
                     }
-                    else if (compResult < 0)
+                    else
                     {
                         // Если key родителя меньше текущего, 
                         // replacement становится правым ребенком родителя. 
@@ -347,19 +346,14 @@ namespace Trees
 
         public bool Remove(TKey key)
         {
-            var current = FindNodeWithParent(key, out Node<TKey, TValue> parent);
-            return RemoveNode(current, parent);
+            return RemoveNode(FindNodeWithParent(key, out Node<TKey, TValue> parent), parent);
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             bool found = true;
             var current = FindNodeWithParent(item.Key, out Node<TKey, TValue> parent);
-            if (current == null)
-            {
-                found = false;
-            }
-            else
+            if (current != null)
             {
                 if (item.Value is IComparable<TValue> compValue)
                 {
