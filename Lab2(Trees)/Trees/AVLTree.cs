@@ -12,7 +12,7 @@ namespace Trees
 
         private class Node<NTKey, NTValue>
         {
-            public NTKey Key { get; private set; }
+            public NTKey Key { get; set; }
             public NTValue Value { get; set; }
             public Node<NTKey, NTValue> Left { get; set; }
             public Node<NTKey, NTValue> Right { get; set; }
@@ -26,7 +26,7 @@ namespace Trees
                 this.Left = left;
                 this.Right = right;
                 this.Height = height;
-            }
+            }           
         }
 
         private Node<TKey, TValue> Root { get; set; }
@@ -93,13 +93,12 @@ namespace Trees
             return GetNodeHeight(node.Right) - GetNodeHeight(node.Left);
         }
 
-        private Node<TKey,TValue> FixNodeHeight(Node<TKey, TValue> node)
+        private void FixNodeHeight(Node<TKey, TValue> node)
         {
             if (node != null)
             {
                 node.Height = Math.Max(GetNodeHeight(node.Left), GetNodeHeight(node.Right)) + 1;
             }
-            return node;
         }
 
         private void CheckKey(TKey key)
@@ -169,8 +168,8 @@ namespace Trees
             var left = node.Left;
             node.Left = left.Right;
             left.Right = node;
-            node=FixNodeHeight(node);
-            left=FixNodeHeight(left);
+            FixNodeHeight(node);
+            FixNodeHeight(left);
             return left;
         }
 
@@ -179,14 +178,14 @@ namespace Trees
             var right = node.Right;
             node.Right = right.Left;
             right.Left = node;
-            node=FixNodeHeight(node);
-            right=FixNodeHeight(right);
+            FixNodeHeight(node);
+            FixNodeHeight(right);
             return right;
         }
 
         private Node<TKey, TValue> Balance(Node<TKey, TValue> node)
         {
-            node=FixNodeHeight(node);
+            FixNodeHeight(node);
             var balanceFactor = GetBalancingFactor(node);
             if (balanceFactor == 2)
             {
@@ -243,46 +242,45 @@ namespace Trees
             }
             else
             {
-                Node<TKey, TValue> replacement = null; //элемент, который заменит current
-                // Если один из сыновей или оба отсутсвуют, то просто заменяем
-                // удаляемый элемент на существующего сына, или на null, если сыновей нет
                 if (current.Left == null || current.Right == null)
                 {
-                    replacement = current.Left ?? current.Right;
+                    var replacement = current.Left ?? current.Right;
+                    if (pathToNode.Count > 0)
+                    {
+                        var parent = pathToNode.Pop();
+                        if (parent.Key.CompareTo(current.Key) > 0)
+                        {
+                            parent.Left = replacement;
+                        }
+                        else
+                        {
+                            parent.Right = replacement;
+                        }
+                        pathToNode.Push(parent);
+                    }
                 }
-                // Если оба сына есть, то ищем элемент, который будет следующим после current
-                // при обходе дерева (successor) и заменяем им текущий узел
                 else
                 {
+                    Node<TKey, TValue> parentSuccessor = null;
                     var successor = current.Right;
-                    var stackSuccessor = new Stack<Node<TKey, TValue>>(GetNodeHeight(Root)
-                        - pathToNode.Count + 2);
 
                     while (successor.Left != null)
                     {
-                        stackSuccessor.Push(successor);
+                        pathToNode.Push(successor);
+                        parentSuccessor = successor;
                         successor = successor.Left;
                     }
 
-                    if (stackSuccessor.Count > 0)
+                    if (parentSuccessor!=null)
                     {
-                        stackSuccessor.Peek().Left = successor.Right;
+                        parentSuccessor.Left = successor.Right;
                     }
                     else
                     {
                         current.Right = successor.Right;
                     }
 
-                    replacement = successor;
-                    replacement.Left = current.Left;
-                    replacement.Right = current.Right;
-                    pathToNode.Push(replacement);
-
-                    var replacementChild = BalancePath(stackSuccessor);
-                    if (replacementChild != null)
-                    {
-                        pathToNode.Push(replacementChild);
-                    }
+                    current.Key = successor.Key;
 
                 }
                 Root = BalancePath(pathToNode);

@@ -9,13 +9,15 @@ namespace ConsoleApp
     {
         static void Main()
         {
-            int length = 10000, startDel = 5000, stopDel = 7000, numberOfTests = 10;
+            int length = 100000, startDel = 50000, stopDel = 70000, numberOfTests = 10;
             var worker = new Worker();
 
             for (int i = 0; i < numberOfTests; i++)
             {
                 var array = worker.CreateRandomArray(length);
                 Console.WriteLine("Test: {0}", i + 1);
+                RunBenchmark(worker.TestTree<AVLTree<int, int>>, array, startDel, stopDel,
+                    "AVLTree");
                 RunBenchmark(worker.TestTree<BinarySearchTree<int, int>>, array, startDel, stopDel,
                     "BinarySearchTree");
                 RunBenchmark(worker.TestTree<SortedDictionary<int, int>>, array, startDel, stopDel,

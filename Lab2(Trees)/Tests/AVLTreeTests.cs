@@ -12,7 +12,7 @@ namespace Tests
 
         private int GetNumber()
         {
-            return 1000000;
+            return 1000;
         }
 
         private IEnumerable<int> DoRandomValues(int count)
