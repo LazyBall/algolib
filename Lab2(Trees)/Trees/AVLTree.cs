@@ -8,6 +8,7 @@ namespace Trees
     public class AVLTree<TKey, TValue> :IDictionary<TKey,TValue>
         where TKey : IComparable<TKey>
     {
+        //check
         public int Count { get; private set; }
 
         private class Node<NTKey, NTValue>
