@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Trees;
-using System.Diagnostics;
 
 namespace ConsoleApp
 {
@@ -9,31 +8,35 @@ namespace ConsoleApp
     {
         static void Main()
         {
-            int length = 100000, startDel = 50000, stopDel = 70000, numberOfTests = 10;
+            int length = 10000, startDel = 5000, stopDel = 7000, numberOfTests = 10;
             var worker = new Worker();
-
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("-------------------Random Data--------------------");
             for (int i = 0; i < numberOfTests; i++)
             {
-                var array = worker.CreateRandomArray(length);
+                var array = worker.CreateRandomValues(length);
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Test: {0}", i + 1);
-                RunBenchmark(worker.TestTree<AVLTree<int, int>>, array, startDel, stopDel,
-                    "AVLTree");
-                RunBenchmark(worker.TestTree<BinarySearchTree<int, int>>, array, startDel, stopDel,
-                    "BinarySearchTree");
-                RunBenchmark(worker.TestTree<SortedDictionary<int, int>>, array, startDel, stopDel,
-                   "SortedDictionary");
-                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.White;
+                ShowInfo(array, startDel, stopDel);
             }
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("-------------------Sorted Data--------------------");
+            Console.ForegroundColor = ConsoleColor.White;
+            ShowInfo(worker.CreateSortedValues(length), startDel, stopDel);
         }
 
-        static void RunBenchmark(Action<int[], int, int> action, int[] array,
-            int startDel, int stopDel, string nameDataStruct)
+
+        static void ShowInfo(int[] array, int startDel, int stopDel)
         {
-            var watch = new Stopwatch();
-            watch.Start();
-            action(array, startDel, stopDel);
-            watch.Stop();
-            Console.WriteLine($"{nameDataStruct} Time: {watch.ElapsedMilliseconds} ms.");
-        }
+            var worker = new Worker();
+            Console.Write("SortedDictionary: \t");
+            worker.RunBenchmark<SortedDictionary<int, int>>(array, startDel, stopDel);
+            Console.Write("AVLTree: \t\t");
+            worker.RunBenchmark<AVLTree<int, int>>(array, startDel, stopDel);
+            Console.Write("BinarySearchTree: \t");
+            worker.RunBenchmark<BinarySearchTree<int, int>>(array, startDel, stopDel);
+            Console.WriteLine();
+        }       
     }
 }

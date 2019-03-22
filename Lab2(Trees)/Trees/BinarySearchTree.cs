@@ -27,61 +27,42 @@ namespace Trees
             }
         }
 
+        private void CheckKey(TKey key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is null.");
+            }
+        }
+
         public TValue this[TKey key]
         {
             get
             {
-                if (TryGetValue(key, out TValue value))
-                {
-                    return value;
-                }
-                else
-                {
-                    throw new KeyNotFoundException
+                if (TryGetValue(key, out TValue value)) return value;
+                else throw new KeyNotFoundException
                         ("The property is retrieved and key does not exist in the collection.");
-                }
+
             }
             set
             {
-                var node = FindNodeWithParent(key, out Node<TKey, TValue> parent);
-                if (node == null)
-                {
-                    throw new KeyNotFoundException
+                var node = FindNode(key);
+                if (node == null) throw new KeyNotFoundException
                         ("The property is retrieved and key does not exist in the collection.");
-                }
-                else
-                {
-                    node.Value = value;
-                }
+                else node.Value = value;
             }
         }
 
         public int Count { get; private set; }
 
-        public ICollection<TKey> Keys
-        {
-            get
-            {
-                var list = new List<TKey>(Count);
-                list.AddRange(from elem in this select elem.Key);
-                return list;
-            }
-        }
+        public ICollection<TKey> Keys => new List<TKey>(from elem in this select elem.Key);
 
-        public ICollection<TValue> Values
-        {
-            get
-            {
-                var list = new List<TValue>(Count);
-                list.AddRange(from elem in this select elem.Value);
-                return list;
-            }
-        }
+        public ICollection<TValue> Values => new List<TValue>(from elem in this select elem.Value);
 
         public bool IsReadOnly => false;
 
         private Node<TKey,TValue> Root { get; set; }
-
+        
         private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey, TValue> node)
         {
             Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
@@ -148,6 +129,60 @@ namespace Trees
 
         }
 
+        private Node<TKey, TValue> FindNode(TKey key)
+        {
+            CheckKey(key);
+            var current = Root;
+
+            while (current != null)
+            {
+                int comparisonResult = current.Key.CompareTo(key);
+                if (comparisonResult > 0)
+                {
+                    current = current.Left;
+                }
+                else if (comparisonResult < 0)
+                {
+                    current = current.Right;
+                }
+                else
+                {
+                    return current;
+                }
+            }
+
+            return null;
+        }
+
+        private Node<TKey, TValue> FindNodeWithParent(TKey key, out Node<TKey, TValue> parent)
+        {
+            CheckKey(key);
+            parent = null;
+            var current = Root;
+
+            while (current != null)
+            {
+                int comparisonResult = current.Key.CompareTo(key);
+                Node<TKey, TValue> next = null;
+                if (comparisonResult > 0)
+                {
+                    next = current.Left;
+                }
+                else if (comparisonResult < 0)
+                {
+                    next = current.Right;
+                }
+                else
+                {
+                    return current;
+                }
+                parent = current;
+                current = next;
+            }
+
+            return null;
+        }
+
         public void Add(TKey key, TValue value)
         {
             var current = FindNodeWithParent(key, out Node<TKey, TValue> parentCurrent);
@@ -191,20 +226,13 @@ namespace Trees
 
         public bool ContainsKey(TKey key)
         {
-            if (FindNodeWithParent(key, out Node<TKey, TValue> parent) == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return FindNode(key) != null;
         }
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
-            var current = FindNodeWithParent(item.Key, out Node<TKey, TValue> parent);
-            if (current == null)
+            var node = FindNode(item.Key);
+            if (node == null)
             {
                 return false;
             }
@@ -212,11 +240,11 @@ namespace Trees
             {
                 if (item.Value is IComparable<TValue> compValue)
                 {
-                    return (compValue.CompareTo(current.Value) == 0);
+                    return (compValue.CompareTo(node.Value) == 0);
                 }
                 else
                 {
-                    return item.Value.Equals(current.Value);
+                    return item.Value.Equals(node.Value);
                 }             
             }
         }
@@ -238,7 +266,6 @@ namespace Trees
                         "is greater than the available space from index to the end of the " +
                         "destination array.");
             }
-
             int i = index;
 
             foreach (var elem in this)
@@ -248,34 +275,7 @@ namespace Trees
             }
 
         }
-
-        private Node<TKey, TValue> FindNodeWithParent(TKey key, out Node<TKey, TValue> parent)
-        {
-            CheckKey(key);
-            parent = null;
-            var current = Root;
-            while (current != null)
-            {              
-                int comparisonResult = current.Key.CompareTo(key);
-                Node<TKey, TValue> next = null;
-                if (comparisonResult > 0)
-                {
-                    next = current.Left;
-                }
-                else if (comparisonResult < 0)
-                {
-                    next = current.Right;
-                }
-                else
-                {
-                    return current;
-                }
-                parent = current;
-                current = next;
-            }
-            return null;
-        }
-
+       
         private bool RemoveNode(Node<TKey, TValue> node, Node<TKey, TValue> nodeParent)
         {
             var current = node;
@@ -373,7 +373,7 @@ namespace Trees
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            var node = FindNodeWithParent(key, out Node<TKey, TValue> parent);
+            var node = FindNode(key);
             if (node == null)
             {
                 value = default(TValue);
@@ -394,17 +394,7 @@ namespace Trees
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private void CheckKey(TKey key)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException("key is null.");
-            }
-        }
     }
 }

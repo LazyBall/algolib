@@ -1,7 +1,5 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
-using System.Collections;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using Trees;
 
 namespace Tests
@@ -9,183 +7,88 @@ namespace Tests
     [TestClass]
     public class AVLTreeTests
     {
+        GeneralTests<AVLTree<int, int>> general = new GeneralTests<AVLTree<int, int>>();
+        readonly int n = 1000;
 
-        private int GetNumber()
+        [TestMethod]
+        public void TestContainsKey()
         {
-            return 1000;
-        }
-
-        private IEnumerable<int> DoRandomValues(int count)
-        {
-            var random = new Random(DateTime.Now.Millisecond);
-            var list = new List<int>(count);
-            for (int i = 0; i < count; i++)
-            {
-                list.Add(random.Next());
-            }
-            return list;
+            general.TestContainsKey(n);
         }
 
         [TestMethod]
         public void TestIndexerByKey()
         {
-            int n = GetNumber();
-            var randomValues = DoRandomValues(n);
-            var avl = new AVLTree<int, int>();
-
-            foreach (var value in randomValues)
-            {
-                if (!avl.ContainsKey(value))
-                {
-                    avl.Add(value, value);
-                }
-            }
-
-            bool flag = true;
-
-            foreach (var value in randomValues)
-            {
-                flag = flag && (avl[value] == value);
-            }
-
-            Assert.AreEqual(true, flag);
+            general.TestIndexerByKey(n);
         }
 
         [TestMethod]
         public void TestAdd()
         {
-            int n = GetNumber();
-            var bin = new AVLTree<int, int>();
-            var randomValues = DoRandomValues(n);
-
-            foreach (var value in randomValues)
-            {
-                if (!bin.ContainsKey(value))
-                {
-                    bin.Add(value, value);
-                }
-            }
-
-            bool flag = true;
-
-            foreach (var value in randomValues)
-            {
-                flag = flag && bin.Contains(new KeyValuePair<int, int>(value, value));
-            }
-
-            Assert.AreEqual(true, flag);
+            general.TestAdd(n);
         }
 
         [TestMethod]
         public void TestCountWhenAdd()
         {
-            int n = GetNumber();
-            var bin = new AVLTree<int, int>();
-            for (int i = 0; i < n; i++)
-            {
-                bin.Add(i, i);
-            }
-            Assert.AreEqual(n, bin.Count);
+            general.TestCountWhenAdd(n);
         }
 
         [TestMethod]
         public void TestCountWhenRemove()
         {
-            int n = 10000, r = 1000;
-            var bin = new AVLTree<int, int>();
-            for (int i = 0; i < n; i++)
-            {
-                bin.Add(i, i);
-            }
-            for (int i = 0; i < r; i++)
-            {
-                bin.Remove(i);
-            }
-            Assert.AreEqual(n - r, bin.Count);
+            general.TestCountWhenRemove(n, n / 2);
         }
 
         [TestMethod]
         public void TestRemoveWhenRightIsNull()
         {
-            var bin = new AVLTree<int, int>
-            {
-                new KeyValuePair<int, int>(8,1),
-                new KeyValuePair<int, int>(10,1),
-                new KeyValuePair<int, int>(5,1),
-                new KeyValuePair<int, int>(2,10),
-            };
-            bin.Remove(5);
-            CollectionAssert.AreEqual(new int[] { 2, 8, 10 }, (ICollection)bin.Keys);
+            general.TestRemoveWhenRightIsNull();
         }
 
         [TestMethod]
         public void TestRemoveWhenRightLeftIsNull()
         {
-            var bin = new AVLTree<int, int>
-            {
-                new KeyValuePair<int, int>(8,1),
-                new KeyValuePair<int, int>(10,1),
-                new KeyValuePair<int, int>(5,1),
-                new KeyValuePair<int, int>(2,10),
-                new KeyValuePair<int, int>(6,10),
-                new KeyValuePair<int, int>(7,10)
-            };
-            bin.Remove(5);
-            CollectionAssert.AreEqual(new int[] { 2, 6, 7, 8, 10 }, (ICollection)bin.Keys);
+            general.TestRemoveWhenRightLeftIsNull();
         }
 
 
         [TestMethod]
         public void TestRemove()
         {
-            var bin = new AVLTree<int, int>
-            {
-                { 8, 1 },
-                { 10, 1 },
-                { 5, 1 },
-                { 2, 1 },
-                { 7, 1 },
-                { 6, 1 }
-            };
-            bin.Remove(5);
-            CollectionAssert.AreEqual(new int[] { 2, 6, 7, 8, 10 }, (ICollection)bin.Keys);
+            general.TestRemove();
         }
-
-
 
         [TestMethod]
         public void TestTraversal()
         {
-            int n = GetNumber();
-            var random = new Random(DateTime.Now.Millisecond);
-            var sortDict = new SortedDictionary<int, int>();
-            var bin = new AVLTree<int, int>();
-            for (int i = 0; i < n; i++)
-            {
-                var value = random.Next();
-                if (!sortDict.ContainsKey(value))
-                {
-                    sortDict.Add(value, value);
-                }
-                if (!bin.ContainsKey(value))
-                {
-                    bin.Add(value, value);
-                }
-            }
-            CollectionAssert.AreEqual(sortDict.Keys, (ICollection)bin.Keys);
+            general.TestTraversal(n);
         }
 
         [TestMethod]
-        public void TestAdd1()
+        public void TestAddNotRandom()
         {
-            var bin = new AVLTree<int, int>
+            general.TestAddNotRandom();
+        }
+
+        [TestMethod]
+        public void TestAddIncreasedEnum()
+        {
+            general.TestAddIncreasedEnum(n);
+        }
+
+        [TestMethod]
+        public void TestHeight()
+        {
+            var tree = new AVLTree<int, int>();
+            var coef = 1.45 / Math.Log(2);
+            bool flag = true;
+            for(int i=-n; i<n; i++)
             {
-                { 2, 2 },
-                { 1, 1 },
-                { 3, 3 },
-                { -1, -1 }
-            };
-            Assert.AreEqual(4, bin.Count);
+                tree.Add(i, i);
+                flag = flag && (tree.Height <= Math.Log(tree.Count + 2) * coef);
+            }
+            Assert.AreEqual(true, flag);
         }
     }
 }
