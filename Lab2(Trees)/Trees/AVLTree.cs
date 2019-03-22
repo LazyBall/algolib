@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Trees
 {
+    //source: https://habr.com/ru/post/150732/
     public class AVLTree<TKey, TValue> : IDictionary<TKey, TValue>
         where TKey : IComparable<TKey>
     {
@@ -403,6 +404,7 @@ namespace Trees
         }
 
         // Function to print inorder traversal using parent pointer 
+        // source https://www.geeksforgeeks.org/inorder-non-threaded-binary-tree-traversal-without-recursion-or-stack/
         private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversalUseParent(Node<TKey, TValue> node)
         {
             var current = node;

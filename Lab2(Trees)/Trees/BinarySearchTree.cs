@@ -62,7 +62,8 @@ namespace Trees
         public bool IsReadOnly => false;
 
         private Node<TKey,TValue> Root { get; set; }
-        
+
+        //source: https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion/
         private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey, TValue> node)
         {
             Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
@@ -81,8 +82,9 @@ namespace Trees
                 yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
                 current = current.Right;
             }
-        }        
+        }
 
+        //source: https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion-and-without-stack/
         private IEnumerable<KeyValuePair<TKey, TValue>> DoMorrisTraversal(Node<TKey,TValue> node)
         {
             Node<TKey,TValue> current, pre;
