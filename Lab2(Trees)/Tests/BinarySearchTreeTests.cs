@@ -7,7 +7,7 @@ namespace Tests
     public class BinarySearchTreeTests
     {
         GeneralTests<BinarySearchTree<int, int>> general = new GeneralTests<BinarySearchTree<int, int>>();
-        readonly int n = 1000;
+        readonly int n = 10000;
 
 
         [TestMethod]
@@ -74,7 +74,13 @@ namespace Tests
         [TestMethod]
         public void TestAddIncreasedEnum()
         {
-            general.TestAddIncreasedEnum(n);
+            general.TestAddSortedValues(n);
+        }
+
+        [TestMethod]
+        public void TestAfterRemove()
+        {
+            general.TestAfterRemove(n);
         }
     }
 }

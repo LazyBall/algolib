@@ -19,9 +19,27 @@ namespace Tests
             return list;
         }
 
+        private int[] DoRandomUniqueValues(int count)
+        {
+            var random = new Random(DateTime.Now.Millisecond);
+            int[] array = new int[count];
+            var hashset = new HashSet<int>();
+            for (int i = 0; i < count; i++)
+            {
+                var value = random.Next();
+                while (hashset.Contains(value))
+                {
+                    value = random.Next();
+                }
+                hashset.Add(value);
+                array[i] = value;
+            }
+            return array;
+        }
+
         public  void TestContainsKey(int n)
         {
-            var uniqueValues = new HashSet<int>(DoRandomValues(n));
+            var uniqueValues = DoRandomUniqueValues(n);
             var tree = new T();
 
             foreach (var value in uniqueValues)
@@ -39,14 +57,14 @@ namespace Tests
             Assert.AreEqual(true, flag);
         }
 
-        public  void TestIndexerByKey(int n)
+        public void TestIndexerByKey(int n)
         {
-            var uniqueValues = new HashSet<int>(DoRandomValues(n));
+            var uniqueValues = DoRandomUniqueValues(n);
             var tree = new T();
 
             foreach (var value in uniqueValues)
             {
-                    tree.Add(value, value);               
+                tree.Add(value, value);
             }
 
             bool flag = true;
@@ -59,14 +77,14 @@ namespace Tests
             Assert.AreEqual(true, flag);
         }
 
-        public  void TestAdd(int n)
+        public void TestAdd(int n)
         {
             var tree = new T();
-            var uniqueValues = new HashSet<int>(DoRandomValues(n));
+            var uniqueValues = DoRandomUniqueValues(n);
 
             foreach (var value in uniqueValues)
             {
-                    tree.Add(value, value);                
+                tree.Add(value, value);
             }
 
             bool flag = true;
@@ -148,12 +166,12 @@ namespace Tests
 
         public  void TestTraversal(int n)
         {
-            var random = new Random(DateTime.Now.Millisecond);
+            var randomValues = DoRandomValues(n);
             var sortDict = new SortedDictionary<int, int>();
             var tree = new T();
-            for (int i = 0; i < n; i++)
+
+            foreach(var value in randomValues)
             {
-                var value = random.Next();
                 if (!sortDict.ContainsKey(value))
                 {
                     sortDict.Add(value, value);
@@ -163,6 +181,7 @@ namespace Tests
                     tree.Add(value, value);
                 }
             }
+
             CollectionAssert.AreEqual(sortDict.Keys, (ICollection)tree.Keys);
         }
 
@@ -178,8 +197,7 @@ namespace Tests
             CollectionAssert.AreEqual(new int[]{ -1,1,2,3}, (ICollection) tree.Keys);
         }
 
-
-        public void TestAddIncreasedEnum(int n)
+        public void TestAddSortedValues(int n)
         {
             var tree = new T();
             var array = new int[n];
@@ -189,6 +207,33 @@ namespace Tests
                 tree.Add(i, i);
             }
             CollectionAssert.AreEqual(array, (ICollection)tree.Keys);
+        }
+
+        public void TestAfterRemove(int n)
+        {
+            var uniqueValues = DoRandomUniqueValues(n);
+            var tree = new T();
+            var sortDict = new SortedDictionary<int, int>();
+
+            foreach(var value in uniqueValues)
+            {
+                sortDict.Add(value, value);
+                tree.Add(value, value);
+            }
+
+            for(int i=n/4; i<3*n/4; i++)
+            {
+                sortDict.Remove(uniqueValues[i]);
+                tree.Remove(uniqueValues[i]);
+            }
+
+            bool flag = true;
+            foreach(var value in uniqueValues)
+            {
+                flag = flag && (sortDict.ContainsKey(value) == tree.ContainsKey(value));
+            }
+
+            Assert.AreEqual(true, flag);
         }
     }
 }

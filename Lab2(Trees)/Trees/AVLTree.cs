@@ -34,9 +34,132 @@ namespace Trees
 
         private Node<TKey, TValue> Root { get; set; }
 
-        public int Height => GetNodeHeight(Root);
-
         public int Count { get; private set; }
+
+        #region Add, FindNode, RemoveNode
+
+        public void Add(TKey key, TValue value)
+        {
+            CheckKey(key);
+            var current = Root;
+            Node<TKey, TValue> parentCurrent = null;
+
+            while (current != null)
+            {
+                int comparisonResult = current.Key.CompareTo(key);
+                Node<TKey, TValue> next = null;
+                if (comparisonResult > 0)
+                {
+                    next = current.Left;
+                }
+                else if (comparisonResult < 0)
+                {
+                    next = current.Right;
+                }
+                else
+                {
+                    throw new ArgumentException
+                     ("An element with the same key already exists in the AVLTree<TKey, TValue>.");
+                }
+                parentCurrent = current;
+                current = next;
+            }
+            current = new Node<TKey, TValue>(key, value, parent: parentCurrent);
+            if (parentCurrent != null)
+            {
+                if (parentCurrent.Key.CompareTo(current.Key) > 0) parentCurrent.Left = current;
+                else parentCurrent.Right = current;
+                Root = BalanceToRoot(parentCurrent);
+            }
+            else
+            {
+                Root = current;
+            }
+            Count++;
+        }
+
+        private Node<TKey, TValue> FindNode(TKey key)
+        {
+            CheckKey(key);
+            var current = Root;
+
+            while (current != null)
+            {
+                int comparisonResult = current.Key.CompareTo(key);
+                if (comparisonResult > 0)
+                {
+                    current = current.Left;
+                }
+                else if (comparisonResult < 0)
+                {
+                    current = current.Right;
+                }
+                else
+                {
+                    return current;
+                }
+            }
+
+            return null;
+        }
+
+        private bool RemoveNode(Node<TKey, TValue> node)
+        {
+            var current = node;
+            if (current == null)
+            {
+                return false;
+            }
+            else
+            {
+                Node<TKey, TValue> balanceFrom = null;
+
+                if (current.Left == null || current.Right == null)
+                {
+                    var replacement = current.Left ?? current.Right;
+                    if (replacement != null) replacement.Parent = current.Parent;
+                    if (current.Parent != null)
+                    {
+                        if (current == current.Parent.Right) current.Parent.Right = replacement;
+                        else current.Parent.Left = replacement;
+                    }
+                    balanceFrom = current.Parent;
+                }
+                else
+                {
+                    var successor = current.Right;
+                    Node<TKey, TValue> parentSuccessor = null;
+
+                    while (successor.Left != null)
+                    {
+                        parentSuccessor = successor;
+                        successor = successor.Left;
+                    }
+
+                    if (parentSuccessor != null)
+                    {
+                        parentSuccessor.Left = successor.Right;
+                        if (successor.Right != null) successor.Right.Parent = parentSuccessor;
+                    }
+                    else
+                    {
+                        current.Right = successor.Right;
+                        if (successor.Right != null) successor.Right.Parent = current;
+                    }
+
+                    current.Key = successor.Key;
+                    balanceFrom = parentSuccessor ?? current;
+                }
+
+                Root = BalanceToRoot(balanceFrom);
+            }
+            Count--;
+            return true;
+        }
+
+        #endregion
+
+        public int Height => GetNodeHeight(Root);
 
         public ICollection<TKey> Keys => new List<TKey>(from elem in this select elem.Key);
 
@@ -85,32 +208,7 @@ namespace Trees
             {
                 throw new ArgumentNullException("key is null.");
             }
-        }
-
-        private Node<TKey, TValue> FindNode(TKey key)
-        {
-            CheckKey(key);
-            var current = Root;
-
-            while (current != null)
-            {
-                int comparisonResult = current.Key.CompareTo(key);
-                if (comparisonResult > 0)
-                {
-                    current = current.Left;
-                }
-                else if (comparisonResult < 0)
-                {
-                    current = current.Right;
-                }
-                else
-                {
-                    return current;
-                }
-            }
-
-            return null;
-        }
+        }      
 
         private Node<TKey, TValue> RotateRight(Node<TKey, TValue> node)
         {
@@ -184,101 +282,7 @@ namespace Trees
             current = Balance(current);
             current.Parent = null;
             return current;
-        }
-
-        private bool RemoveNode(Node<TKey, TValue> node)
-        {
-            var current = node;
-            if (current == null)
-            {
-                return false;
-            }
-            else
-            {
-                Node<TKey, TValue> balanceFrom = null;
-
-                if (current.Left == null || current.Right == null)
-                {
-                    var replacement = current.Left ?? current.Right;
-                    if (replacement != null) replacement.Parent = current.Parent;
-                    if (current.Parent != null)
-                    {
-                        if (current == current.Parent.Right) current.Parent.Right = replacement;
-                        else current.Parent.Left = replacement;
-                    }                    
-                    balanceFrom = current.Parent;
-                }
-                else
-                {
-                    var successor = current.Right;
-                    Node<TKey, TValue> parentSuccessor = null;
-
-                    while (successor.Left != null)
-                    {
-                        parentSuccessor = successor;
-                        successor = successor.Left;
-                    }
-
-                    if (parentSuccessor != null)
-                    {
-                        parentSuccessor.Left = successor.Right;
-                        if (successor.Right != null) successor.Right.Parent = parentSuccessor;
-                    }
-                    else
-                    {
-                        current.Right = successor.Right;
-                        if (successor.Right != null) successor.Right.Parent = current;
-                    }
-
-                    current.Key = successor.Key;
-                    balanceFrom = parentSuccessor ?? current;
-                }
-
-                Root = BalanceToRoot(balanceFrom);
-            }
-            Count--;
-            return true;
-        }
-
-        public void Add(TKey key, TValue value)
-        {
-            CheckKey(key);
-            var current = Root;
-            Node<TKey, TValue> parentCurrent = null;
-
-            while (current != null)
-            {
-                int comparisonResult = current.Key.CompareTo(key);
-                Node<TKey, TValue> next = null;
-                if (comparisonResult > 0)
-                {
-                    next = current.Left;
-                }
-                else if (comparisonResult < 0)
-                {
-                    next = current.Right;
-                }
-                else
-                {
-                    throw new ArgumentException
-                     ("An element with the same key already exists in the AVLTree<TKey, TValue>.");
-                }
-                parentCurrent = current;
-                current = next;
-            }
-            current = new Node<TKey, TValue>(key, value, parent: parentCurrent);
-            if (parentCurrent != null)
-            {
-                if (parentCurrent.Key.CompareTo(current.Key) > 0) parentCurrent.Left = current;
-                else parentCurrent.Right = current;
-                Root = BalanceToRoot(parentCurrent);
-            }
-            else
-            {
-                Root = current;
-            }
-            Count++;
-        }
+        }     
 
         public bool Remove(TKey key)
         {
@@ -306,7 +310,7 @@ namespace Trees
 
         public bool ContainsKey(TKey key)
         {
-            return (FindNode(key) != null);
+            return FindNode(key) != null;
         }
 
         public bool TryGetValue(TKey key, out TValue value)

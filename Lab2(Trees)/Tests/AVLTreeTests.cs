@@ -8,7 +8,7 @@ namespace Tests
     public class AVLTreeTests
     {
         GeneralTests<AVLTree<int, int>> general = new GeneralTests<AVLTree<int, int>>();
-        readonly int n = 1000;
+        readonly int n = 10000;
 
         [TestMethod]
         public void TestContainsKey()
@@ -74,7 +74,13 @@ namespace Tests
         [TestMethod]
         public void TestAddIncreasedEnum()
         {
-            general.TestAddIncreasedEnum(n);
+            general.TestAddSortedValues(n);
+        }
+
+        [TestMethod]
+        public void TestAfterRemove()
+        {
+            general.TestAfterRemove(n);
         }
 
         [TestMethod]

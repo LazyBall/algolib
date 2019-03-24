@@ -27,163 +27,11 @@ namespace Trees
             }
         }
 
-        private void CheckKey(TKey key)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException("key is null.");
-            }
-        }
-
-        public TValue this[TKey key]
-        {
-            get
-            {
-                if (TryGetValue(key, out TValue value)) return value;
-                else throw new KeyNotFoundException
-                        ("The property is retrieved and key does not exist in the collection.");
-
-            }
-            set
-            {
-                var node = FindNode(key);
-                if (node == null) throw new KeyNotFoundException
-                        ("The property is retrieved and key does not exist in the collection.");
-                else node.Value = value;
-            }
-        }
+        private Node<TKey, TValue> Root { get; set; }
 
         public int Count { get; private set; }
 
-        public ICollection<TKey> Keys => new List<TKey>(from elem in this select elem.Key);
-
-        public ICollection<TValue> Values => new List<TValue>(from elem in this select elem.Value);
-
-        public bool IsReadOnly => false;
-
-        private Node<TKey,TValue> Root { get; set; }
-
-        //source: https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion/
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey, TValue> node)
-        {
-            Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
-            var current = node;
-
-            while (current != null || stack.Count > 0)
-            {
-
-                while (current != null)
-                {
-                    stack.Push(current);
-                    current = current.Left;
-                }
-
-                current = stack.Pop();
-                yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
-                current = current.Right;
-            }
-        }
-
-        //source: https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion-and-without-stack/
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoMorrisTraversal(Node<TKey,TValue> node)
-        {
-            Node<TKey,TValue> current, pre;
-            current = node;
-
-            while (current != null)
-            {
-                if (current.Left == null)
-                {
-                    yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
-                    current = current.Right;
-                }
-                else
-                {
-                    /* Find the inorder predecessor of current */
-                    pre = current.Left;
-
-                    while (pre.Right != null && pre.Right != current)
-                    {
-                        pre = pre.Right;
-                    }
-
-                    /* Make current as right child  
-                    of its inorder predecessor */
-                    if (pre.Right == null)
-                    {
-                        pre.Right = current;
-                        current = current.Left;
-                    }
-
-                    /* Revert the changes made in  
-                    if part to restore the original  
-                    tree i.e., fix the right child  
-                    of predecssor*/
-                    else
-                    {
-                        pre.Right = null;
-                        yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
-                        current = current.Right;
-                    } /* End of if condition pre->right == NULL */
-
-                } /* End of if condition current->left == NULL*/
-            }  
-
-        }
-
-        private Node<TKey, TValue> FindNode(TKey key)
-        {
-            CheckKey(key);
-            var current = Root;
-
-            while (current != null)
-            {
-                int comparisonResult = current.Key.CompareTo(key);
-                if (comparisonResult > 0)
-                {
-                    current = current.Left;
-                }
-                else if (comparisonResult < 0)
-                {
-                    current = current.Right;
-                }
-                else
-                {
-                    return current;
-                }
-            }
-
-            return null;
-        }
-
-        private Node<TKey, TValue> FindNodeWithParent(TKey key, out Node<TKey, TValue> parent)
-        {
-            CheckKey(key);
-            parent = null;
-            var current = Root;
-
-            while (current != null)
-            {
-                int comparisonResult = current.Key.CompareTo(key);
-                Node<TKey, TValue> next = null;
-                if (comparisonResult > 0)
-                {
-                    next = current.Left;
-                }
-                else if (comparisonResult < 0)
-                {
-                    next = current.Right;
-                }
-                else
-                {
-                    return current;
-                }
-                parent = current;
-                current = next;
-            }
-
-            return null;
-        }
+        #region Add, FindNode, RemoveNode
 
         public void Add(TKey key, TValue value)
         {
@@ -215,69 +63,31 @@ namespace Trees
             Count++;
         }
 
-        public void Add(KeyValuePair<TKey, TValue> item)
+        private Node<TKey, TValue> FindNode(TKey key)
         {
-            Add(item.Key, item.Value);
-        }
+            CheckKey(key);
+            var current = Root;
 
-        public void Clear()
-        {
-            Root = null;
-            Count = 0;
-        }
-
-        public bool ContainsKey(TKey key)
-        {
-            return FindNode(key) != null;
-        }
-
-        public bool Contains(KeyValuePair<TKey, TValue> item)
-        {
-            var node = FindNode(item.Key);
-            if (node == null)
+            while (current != null)
             {
-                return false;
-            }
-            else
-            {
-                if (item.Value is IComparable<TValue> compValue)
+                int comparisonResult = current.Key.CompareTo(key);
+                if (comparisonResult > 0)
                 {
-                    return (compValue.CompareTo(node.Value) == 0);
+                    current = current.Left;
+                }
+                else if (comparisonResult < 0)
+                {
+                    current = current.Right;
                 }
                 else
                 {
-                    return item.Value.Equals(node.Value);
-                }             
+                    return current;
+                }
             }
+
+            return null;
         }
 
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
-        {
-            if (array == null)
-            {
-                throw new ArgumentNullException("array is null.");
-            }
-            if (index < 0)
-            {
-                throw new ArgumentOutOfRangeException("index is less than 0.");
-            }
-            if (array.Length < index + this.Count)
-            {
-                throw new ArgumentException("The number of elements in the source " +
-                        "BinarySearchTree<TKey,TValue> " +
-                        "is greater than the available space from index to the end of the " +
-                        "destination array.");
-            }
-            int i = index;
-
-            foreach (var elem in this)
-            {
-                array[i] = elem;
-                i++;
-            }
-
-        }
-       
         private bool RemoveNode(Node<TKey, TValue> node, Node<TKey, TValue> nodeParent)
         {
             var current = node;
@@ -346,6 +156,200 @@ namespace Trees
             return true;
         }
 
+        #endregion
+
+        private void CheckKey(TKey key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is null.");
+            }
+        }
+
+        public TValue this[TKey key]
+        {
+            get
+            {
+                if (TryGetValue(key, out TValue value)) return value;
+                else throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
+
+            }
+            set
+            {
+                var node = FindNode(key);
+                if (node == null) throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
+                else node.Value = value;
+            }
+        }        
+
+        public ICollection<TKey> Keys => new List<TKey>(from elem in this select elem.Key);
+
+        public ICollection<TValue> Values => new List<TValue>(from elem in this select elem.Value);
+
+        public bool IsReadOnly => false;       
+
+        //source: https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion/
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey, TValue> node)
+        {
+            Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
+            var current = node;
+
+            while (current != null || stack.Count > 0)
+            {
+
+                while (current != null)
+                {
+                    stack.Push(current);
+                    current = current.Left;
+                }
+
+                current = stack.Pop();
+                yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                current = current.Right;
+            }
+        }
+
+        //source: https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion-and-without-stack/
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoMorrisTraversal(Node<TKey,TValue> node)
+        {
+            Node<TKey,TValue> current, pre;
+            current = node;
+
+            while (current != null)
+            {
+                if (current.Left == null)
+                {
+                    yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                    current = current.Right;
+                }
+                else
+                {
+                    /* Find the inorder predecessor of current */
+                    pre = current.Left;
+
+                    while (pre.Right != null && pre.Right != current)
+                    {
+                        pre = pre.Right;
+                    }
+
+                    /* Make current as right child  
+                    of its inorder predecessor */
+                    if (pre.Right == null)
+                    {
+                        pre.Right = current;
+                        current = current.Left;
+                    }
+
+                    /* Revert the changes made in  
+                    if part to restore the original  
+                    tree i.e., fix the right child  
+                    of predecssor*/
+                    else
+                    {
+                        pre.Right = null;
+                        yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                        current = current.Right;
+                    } /* End of if condition pre->right == NULL */
+
+                } /* End of if condition current->left == NULL*/
+            }  
+
+        }        
+
+        private Node<TKey, TValue> FindNodeWithParent(TKey key, out Node<TKey, TValue> parent)
+        {
+            CheckKey(key);
+            parent = null;
+            var current = Root;
+
+            while (current != null)
+            {
+                int comparisonResult = current.Key.CompareTo(key);
+                Node<TKey, TValue> next = null;
+                if (comparisonResult > 0)
+                {
+                    next = current.Left;
+                }
+                else if (comparisonResult < 0)
+                {
+                    next = current.Right;
+                }
+                else
+                {
+                    return current;
+                }
+                parent = current;
+                current = next;
+            }
+
+            return null;
+        }
+
+        public void Add(KeyValuePair<TKey, TValue> item)
+        {
+            Add(item.Key, item.Value);
+        }
+
+        public void Clear()
+        {
+            Root = null;
+            Count = 0;
+        }
+
+        public bool ContainsKey(TKey key)
+        {
+            return FindNode(key) != null;
+        }
+
+        public bool Contains(KeyValuePair<TKey, TValue> item)
+        {
+            var node = FindNode(item.Key);
+            if (node == null)
+            {
+                return false;
+            }
+            else
+            {
+                if (item.Value is IComparable<TValue> compValue)
+                {
+                    return (compValue.CompareTo(node.Value) == 0);
+                }
+                else
+                {
+                    return item.Value.Equals(node.Value);
+                }             
+            }
+        }
+
+        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array is null.");
+            }
+            if (index < 0)
+            {
+                throw new ArgumentOutOfRangeException("index is less than 0.");
+            }
+            if (array.Length < index + this.Count)
+            {
+                throw new ArgumentException("The number of elements in the source " +
+                        "BinarySearchTree<TKey,TValue> " +
+                        "is greater than the available space from index to the end of the " +
+                        "destination array.");
+            }
+            int i = index;
+
+            foreach (var elem in this)
+            {
+                array[i] = elem;
+                i++;
+            }
+
+        }
+       
         public bool Remove(TKey key)
         {
             return RemoveNode(FindNodeWithParent(key, out Node<TKey, TValue> parent), parent);
