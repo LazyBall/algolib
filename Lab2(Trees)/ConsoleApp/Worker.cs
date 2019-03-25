@@ -158,7 +158,7 @@ namespace ConsoleApp
             }
 
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("In Average: ");
+            Console.WriteLine("Average: ");
             Console.ForegroundColor = ConsoleColor.White;
 
             Console.Write("SortedDictionary: \t");
