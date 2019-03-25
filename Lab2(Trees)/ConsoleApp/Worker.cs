@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Trees;
 
 namespace ConsoleApp
@@ -13,6 +12,13 @@ namespace ConsoleApp
             public long AddTimeInMs { get; set; }
             public long RemoveTimeInMs { get; set; }
             public long FindTimeInMs { get; set; }
+
+            public void Add(BenchmarkResult result)
+            {
+                this.AddTimeInMs += result.AddTimeInMs;
+                this.RemoveTimeInMs += result.RemoveTimeInMs;
+                this.FindTimeInMs += result.FindTimeInMs;
+            }
         }
 
         int[] CreateRandomUniqueValues(int length)
@@ -23,7 +29,7 @@ namespace ConsoleApp
             for (int i = 0; i < length; i++)
             {
                 var value = random.Next();
-                while(hashset.Contains(value))
+                while (hashset.Contains(value))
                 {
                     value = random.Next();
                 }
@@ -34,7 +40,7 @@ namespace ConsoleApp
         }
 
         int[] CreateSortedUniqueValues(int length)
-        {            
+        {
             int[] array = new int[length];
             for (int i = 0; i < length; i++)
             {
@@ -62,7 +68,7 @@ namespace ConsoleApp
 
         void FindElements(IDictionary<int, int> dict, int[] array)
         {
-            foreach(var element in array)
+            foreach (var element in array)
             {
                 var flag = dict.ContainsKey(element);
             }
@@ -74,8 +80,8 @@ namespace ConsoleApp
             var dict = new T();
             var worker = new Worker();
             var watch = new Stopwatch();
-            var result = new BenchmarkResult();     
-            
+            var result = new BenchmarkResult();
+
             watch.Start();
             worker.AddElements(dict, array);
             watch.Stop();
@@ -94,52 +100,52 @@ namespace ConsoleApp
             return result;
         }
 
-        void RunTest(int[] array, int startDel, int stopDel, List<BenchmarkResult> resultsSD=null,
-            List<BenchmarkResult> resultsAVL=null, List<BenchmarkResult> resultsBin=null)
+        void RunTest(int[] array, int startDel, int stopDel, BenchmarkResult totalResultSD = null,
+            BenchmarkResult totalResultAVL = null, BenchmarkResult totalResultBin = null)
         {
-            Console.Write("SortedDictionary: \t");
+            Console.Write("SortedDictionary:\t");
             var result = RunBenchmark<SortedDictionary<int, int>>(array, startDel, stopDel);
-            resultsSD?.Add(result);
-            Console.WriteLine(CreateTestInfo(result));        
-            
-            Console.Write("AVLTree: \t\t");
+            totalResultSD?.Add(result);
+            Console.WriteLine(CreateTestInfo(result));
+
+            Console.Write("AVLTree:\t\t");
             result = RunBenchmark<AVLTree<int, int>>(array, startDel, stopDel);
-            resultsAVL?.Add(result);
-            Console.WriteLine(CreateTestInfo(result));   
-            
-            Console.Write("BinarySearchTree: \t");
+            totalResultAVL?.Add(result);
+            Console.WriteLine(CreateTestInfo(result));
+
+            Console.Write("BinarySearchTree:\t");
             result = RunBenchmark<BinarySearchTree<int, int>>(array, startDel, stopDel);
-            resultsBin?.Add(result);
-            Console.WriteLine(CreateTestInfo(result)); 
-            
+            totalResultBin?.Add(result);
+            Console.WriteLine(CreateTestInfo(result));
+
             Console.WriteLine();
         }
 
         string CreateTestInfo(BenchmarkResult result)
         {
-            return 
-                $"Add: {result.AddTimeInMs} ms \t" +
-                $"Remove: {result.RemoveTimeInMs} ms \t" +
-                $"Find: {result.FindTimeInMs} ms \t" +
-                $"Total time: {result.AddTimeInMs + result.RemoveTimeInMs + result.FindTimeInMs } ms";
+            return
+                $"Add: {result.AddTimeInMs} ms\t" +
+                $"Remove: {result.RemoveTimeInMs} ms\t" +
+                $"Find: {result.FindTimeInMs} ms\t" +
+                $"Total: {result.AddTimeInMs + result.RemoveTimeInMs + result.FindTimeInMs} ms";
         }
 
-        BenchmarkResult CreateAverageValues(List<BenchmarkResult> results)
+        BenchmarkResult CreateAverageValue(BenchmarkResult totalResult, int numberOfTests)
         {
             return new BenchmarkResult()
             {
-                AddTimeInMs = (long)(from t in results select t.AddTimeInMs).Average(),
-                RemoveTimeInMs = (long)(from t in results select t.RemoveTimeInMs).Average(),
-                FindTimeInMs = (long)(from t in results select t.FindTimeInMs).Average()
+                AddTimeInMs = totalResult.AddTimeInMs / numberOfTests,
+                RemoveTimeInMs = totalResult.RemoveTimeInMs / numberOfTests,
+                FindTimeInMs = totalResult.FindTimeInMs / numberOfTests
             };
         }
 
         public void ShowInfo(int lengthOfArray, int startDel, int stopDel, int numberOfTests)
         {
             Console.ForegroundColor = ConsoleColor.Blue;
-            var listSD = new List<BenchmarkResult>();
-            var listAVL = new List<BenchmarkResult>();
-            var listBin = new List<BenchmarkResult>();
+            var totalResultSD = new BenchmarkResult();
+            var totalResultAVL = new BenchmarkResult();
+            var totalResultBin = new BenchmarkResult();
             Console.WriteLine("---------------------------Random Data-----------------------------");
 
             for (int i = 0; i < numberOfTests; i++)
@@ -148,7 +154,7 @@ namespace ConsoleApp
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Test: {0}", i + 1);
                 Console.ForegroundColor = ConsoleColor.White;
-                RunTest(array, startDel, stopDel, listSD, listAVL, listBin);
+                RunTest(array, startDel, stopDel, totalResultSD, totalResultAVL, totalResultBin);
             }
 
             Console.ForegroundColor = ConsoleColor.Red;
@@ -156,13 +162,13 @@ namespace ConsoleApp
             Console.ForegroundColor = ConsoleColor.White;
 
             Console.Write("SortedDictionary: \t");
-            Console.WriteLine(CreateTestInfo(CreateAverageValues(listSD)));
+            Console.WriteLine(CreateTestInfo(CreateAverageValue(totalResultSD, numberOfTests)));
 
             Console.Write("AVLTree: \t\t");
-            Console.WriteLine(CreateTestInfo(CreateAverageValues(listAVL)));
+            Console.WriteLine(CreateTestInfo(CreateAverageValue(totalResultAVL, numberOfTests)));
 
             Console.Write("BinarySearchTree: \t");
-            Console.WriteLine(CreateTestInfo(CreateAverageValues(listBin)));
+            Console.WriteLine(CreateTestInfo(CreateAverageValue(totalResultBin, numberOfTests)));
             Console.WriteLine();
 
             Console.ForegroundColor = ConsoleColor.Blue;

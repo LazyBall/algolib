@@ -17,10 +17,10 @@ namespace Trees
             public Node<NTKey, NTValue> Left { get; set; }
             public Node<NTKey, NTValue> Right { get; set; }
             public Node<NTKey, NTValue> Parent { get; set; }
-            public int Height { get; set; }
+            public byte Height { get; set; }
 
             public Node(NTKey key, NTValue value, Node<NTKey, NTValue> left = null,
-                Node<NTKey, NTValue> right = null, Node<NTKey, NTValue> parent = null, int height = 1)
+                Node<NTKey, NTValue> right = null, Node<NTKey, NTValue> parent = null, byte height = 1)
             {
                 this.Key = key;
                 this.Value = value;
@@ -198,7 +198,7 @@ namespace Trees
         {
             if (node != null)
             {
-                node.Height = Math.Max(GetNodeHeight(node.Left), GetNodeHeight(node.Right)) + 1;
+                node.Height = (byte)(Math.Max(GetNodeHeight(node.Left), GetNodeHeight(node.Right)) + 1);
             }
         }
 
