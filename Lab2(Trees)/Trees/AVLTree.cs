@@ -270,7 +270,7 @@ namespace Trees
             {
                 var parent = current.Parent;               
                 bool right = parent.Right == current;
-                int oldHeight = current.Height;
+                var oldHeight = current.Height;
                 current = Balance(current);                
                 current.Parent = parent;
                 if (right) parent.Right = current;
