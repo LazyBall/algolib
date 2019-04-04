@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HashTable", "HashTable\Hash
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{BCAC29AF-A70C-4A9D-AF3D-0EF0D9BB4396}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{40250446-F77A-4C61-A040-8F621183E2E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{BCAC29AF-A70C-4A9D-AF3D-0EF0D9BB4396}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCAC29AF-A70C-4A9D-AF3D-0EF0D9BB4396}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCAC29AF-A70C-4A9D-AF3D-0EF0D9BB4396}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40250446-F77A-4C61-A040-8F621183E2E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40250446-F77A-4C61-A040-8F621183E2E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40250446-F77A-4C61-A040-8F621183E2E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40250446-F77A-4C61-A040-8F621183E2E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

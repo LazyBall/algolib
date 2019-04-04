@@ -50,25 +50,25 @@ namespace HashTable
         private Entry[] _entries;
         private const double c1 = 0.5;
         private const double c2 = 0.5;
-        //const double maxLoadFactor = 0.7;
+        //private const double _maxLoadFactor = 0.7;
         private int _maxSteps;
 
-        private int CreateNewSize(int oldSize)
+        private void CreateNewEntries()
         {
-            return oldSize * 2;            
+            _entries = new Entry[_entries.Length * 4];
+            _maxSteps += 1;            
         }
 
         public HashTable()
         {
             _entries = new Entry[16];
-            _maxSteps = 4;
+            _maxSteps = 1;
         }
 
         private void Resize()
         {
             var oldArray = _entries;
-            _entries = new Entry[CreateNewSize(_entries.Length)];
-            _maxSteps++;
+            CreateNewEntries();
 
             int i = 0, count = 0;
             while (i < oldArray.Length && count < Count)
@@ -79,16 +79,15 @@ namespace HashTable
                 {
                     if (!TryToPut(entry))
                     {
-                        _entries = new Entry[CreateNewSize(_entries.Length)];
-                        _maxSteps++;
+                        CreateNewEntries();
                         i = 0;
                         count = 0;
                     }
                     else
-                    {                       
+                    {
                         count++;
                     }
-                }                
+                }
             }
 
         }
@@ -130,7 +129,12 @@ namespace HashTable
             {
                 Resize();
             }
+
             Count++;
+            //if (Count >= _entries.Length * _maxLoadFactor)
+            //{
+            //    Resize();
+            //}
         }
         
         public void Add(TKey key, TValue value)
