@@ -1,0 +1,86 @@
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Trees;
+
+namespace Tests
+{
+    [TestClass]
+    public class DimasAVLTreeTests
+    {
+
+        GeneralTests<DimasAVLTree<int, int>> general = new GeneralTests<DimasAVLTree<int, int>>();
+        readonly int n = 10000;
+
+        [TestMethod]
+        public void TestContainsKey()
+        {
+            general.TestContainsKey(n);
+        }
+
+        [TestMethod]
+        public void TestIndexerByKey()
+        {
+            general.TestIndexerByKey(n);
+        }
+
+        [TestMethod]
+        public void TestAdd()
+        {
+            general.TestAdd(n);
+        }
+
+        [TestMethod]
+        public void TestCountWhenAdd()
+        {
+            general.TestCountWhenAdd(n);
+        }
+
+        [TestMethod]
+        public void TestCountWhenRemove()
+        {
+            general.TestCountWhenRemove(n, n / 2);
+        }
+
+        [TestMethod]
+        public void TestRemoveWhenRightIsNull()
+        {
+            general.TestRemoveWhenRightIsNull();
+        }
+
+        [TestMethod]
+        public void TestRemoveWhenRightLeftIsNull()
+        {
+            general.TestRemoveWhenRightLeftIsNull();
+        }
+
+
+        [TestMethod]
+        public void TestRemove()
+        {
+            general.TestRemove();
+        }
+
+        [TestMethod]
+        public void TestTraversal()
+        {
+            general.TestTraversal(n);
+        }
+
+        [TestMethod]
+        public void TestAddNotRandom()
+        {
+            general.TestAddNotRandom();
+        }
+
+        [TestMethod]
+        public void TestAddIncreasedEnum()
+        {
+            general.TestAddSortedValues(n);
+        }
+
+        [TestMethod]
+        public void TestAfterRemove()
+        {
+            general.TestAfterRemove(n);
+        }
+    }
+}

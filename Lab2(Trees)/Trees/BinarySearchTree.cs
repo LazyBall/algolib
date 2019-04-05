@@ -9,16 +9,16 @@ namespace Trees
         where TKey : IComparable<TKey>
     {
 
-        private class Node<NTKey, NTValue>
+        private class Node
         {
-            public NTKey Key { get; private set; }
-            public NTValue Value { get; set; }
-            public Node<NTKey, NTValue> Left { get; set; }
-            public Node<NTKey, NTValue> Right { get; set; }
+            public TKey Key { get; private set; }
+            public TValue Value { get; set; }
+            public Node Left { get; set; }
+            public Node Right { get; set; }
 
 
-            public Node(NTKey key, NTValue value, Node<NTKey, NTValue> left = null,
-                Node<NTKey, NTValue> right = null)
+            public Node(TKey key, TValue value, Node left = null,
+                Node right = null)
             {
                 this.Key = key;
                 this.Value = value;
@@ -27,7 +27,7 @@ namespace Trees
             }
         }
 
-        private Node<TKey, TValue> Root { get; set; }
+        private Node Root { get; set; }
 
         public int Count { get; private set; }
 
@@ -35,7 +35,7 @@ namespace Trees
 
         public void Add(TKey key, TValue value)
         {
-            var current = FindNodeWithParent(key, out Node<TKey, TValue> parentCurrent);
+            var current = FindNodeWithParent(key, out Node parentCurrent);
             if (current != null)
             {
                 throw new ArgumentException
@@ -43,7 +43,7 @@ namespace Trees
             }
             else
             {
-                current = new Node<TKey, TValue>(key, value);
+                current = new Node(key, value);
                 if (parentCurrent == null)
                 {
                     Root = current;
@@ -63,7 +63,7 @@ namespace Trees
             Count++;
         }
 
-        private Node<TKey, TValue> FindNode(TKey key)
+        private Node FindNode(TKey key)
         {
             CheckKey(key);
             var current = Root;
@@ -88,7 +88,7 @@ namespace Trees
             return null;
         }
 
-        private bool RemoveNode(Node<TKey, TValue> node, Node<TKey, TValue> nodeParent)
+        private bool RemoveNode(Node node, Node nodeParent)
         {
             var current = node;
             var currentParent = nodeParent;
@@ -98,7 +98,7 @@ namespace Trees
             }
             else
             {
-                Node<TKey, TValue> replacement = null; //элемент, который заменит current
+                Node replacement = null; //элемент, который заменит current
                 // Если один из сыновей или оба отсутсвуют, то просто заменяем
                 // удаляемый элемент на существующего сына, или на null, если сыновей нет
                 if (current.Left == null || current.Right == null)
@@ -110,7 +110,7 @@ namespace Trees
                 else
                 {
                     var successor = current.Right;
-                    Node<TKey, TValue> successorParent = null;
+                    Node successorParent = null;
 
                     while (successor.Left != null)
                     {
@@ -191,9 +191,9 @@ namespace Trees
         public bool IsReadOnly => false;       
 
         //source: https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion/
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey, TValue> node)
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node node)
         {
-            Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
+            Stack<Node> stack = new Stack<Node>(Count);
             var current = node;
 
             while (current != null || stack.Count > 0)
@@ -212,9 +212,9 @@ namespace Trees
         }
 
         //source: https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion-and-without-stack/
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoMorrisTraversal(Node<TKey,TValue> node)
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoMorrisTraversal(Node node)
         {
-            Node<TKey,TValue> current, pre;
+            Node current, pre;
             current = node;
 
             while (current != null)
@@ -258,7 +258,7 @@ namespace Trees
 
         }        
 
-        private Node<TKey, TValue> FindNodeWithParent(TKey key, out Node<TKey, TValue> parent)
+        private Node FindNodeWithParent(TKey key, out Node parent)
         {
             CheckKey(key);
             parent = null;
@@ -267,7 +267,7 @@ namespace Trees
             while (current != null)
             {
                 int comparisonResult = current.Key.CompareTo(key);
-                Node<TKey, TValue> next = null;
+                Node next = null;
                 if (comparisonResult > 0)
                 {
                     next = current.Left;
@@ -352,13 +352,13 @@ namespace Trees
        
         public bool Remove(TKey key)
         {
-            return RemoveNode(FindNodeWithParent(key, out Node<TKey, TValue> parent), parent);
+            return RemoveNode(FindNodeWithParent(key, out Node parent), parent);
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             bool found = true;
-            var current = FindNodeWithParent(item.Key, out Node<TKey, TValue> parent);
+            var current = FindNodeWithParent(item.Key, out Node parent);
             if (current != null)
             {
                 if (item.Value is IComparable<TValue> compValue)

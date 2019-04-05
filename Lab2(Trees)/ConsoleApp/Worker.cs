@@ -118,6 +118,9 @@ namespace ConsoleApp
             totalResultBin?.Add(result);
             Console.WriteLine(CreateTestInfo(result));
 
+            Console.Write("Dimas:\t\t\t");
+            result = RunBenchmark<DimasAVLTree<int, int>>(array, startDel, stopDel);
+            Console.WriteLine(CreateTestInfo(result));
             Console.WriteLine();
         }
 

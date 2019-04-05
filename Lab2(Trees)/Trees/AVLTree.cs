@@ -10,17 +10,17 @@ namespace Trees
         where TKey : IComparable<TKey>
     {
 
-        private class Node<NTKey, NTValue>
+        private class Node
         {
-            public NTKey Key { get; set; }
-            public NTValue Value { get; set; }
-            public Node<NTKey, NTValue> Left { get; set; }
-            public Node<NTKey, NTValue> Right { get; set; }
-            public Node<NTKey, NTValue> Parent { get; set; }
-            public byte Height { get; set; }
+            public TKey Key { get; private set; }
+            public TValue Value { get; set; }
+            public Node Left { get; set; }
+            public Node Right { get; set; }
+            public Node Parent { get; set; }
+            public int Height { get; set; }
 
-            public Node(NTKey key, NTValue value, Node<NTKey, NTValue> left = null,
-                Node<NTKey, NTValue> right = null, Node<NTKey, NTValue> parent = null, byte height = 1)
+            public Node(TKey key, TValue value, Node left = null,
+                Node right = null, Node parent = null, int height = 1)
             {
                 this.Key = key;
                 this.Value = value;
@@ -32,7 +32,7 @@ namespace Trees
 
         }
 
-        private Node<TKey, TValue> Root { get; set; }
+        private Node Root { get; set; }
 
         public int Count { get; private set; }
 
@@ -42,29 +42,27 @@ namespace Trees
         {
             CheckKey(key);
             var current = Root;
-            Node<TKey, TValue> parentCurrent = null;
+            Node parentCurrent = null;
 
             while (current != null)
             {
+                parentCurrent = current;
                 int comparisonResult = current.Key.CompareTo(key);
-                Node<TKey, TValue> next = null;
                 if (comparisonResult > 0)
                 {
-                    next = current.Left;
+                    current = current.Left;
                 }
                 else if (comparisonResult < 0)
                 {
-                    next = current.Right;
+                    current = current.Right;
                 }
                 else
                 {
                     throw new ArgumentException
                      ("An element with the same key already exists in the AVLTree<TKey, TValue>.");
                 }
-                parentCurrent = current;
-                current = next;
             }
-            current = new Node<TKey, TValue>(key, value, parent: parentCurrent);
+            current = new Node(key, value, parent: parentCurrent);
             if (parentCurrent != null)
             {
                 if (parentCurrent.Key.CompareTo(current.Key) > 0) parentCurrent.Left = current;
@@ -78,7 +76,7 @@ namespace Trees
             Count++;
         }
 
-        private Node<TKey, TValue> FindNode(TKey key)
+        private Node FindNode(TKey key)
         {
             CheckKey(key);
             var current = Root;
@@ -103,7 +101,7 @@ namespace Trees
             return null;
         }
 
-        private bool RemoveNode(Node<TKey, TValue> node)
+        private bool RemoveNode(Node node)
         {
             var current = node;
             if (current == null)
@@ -112,7 +110,6 @@ namespace Trees
             }
             else
             {
-                Node<TKey, TValue> balanceFrom = null;
 
                 if (current.Left == null || current.Right == null)
                 {
@@ -122,36 +119,50 @@ namespace Trees
                     {
                         if (current == current.Parent.Right) current.Parent.Right = replacement;
                         else current.Parent.Left = replacement;
-                    }
-                    balanceFrom = current.Parent;
-                }
-                else
-                {
-                    var successor = current.Right;
-                    Node<TKey, TValue> parentSuccessor = null;
-
-                    while (successor.Left != null)
-                    {
-                        parentSuccessor = successor;
-                        successor = successor.Left;
-                    }
-
-                    if (parentSuccessor != null)
-                    {
-                        parentSuccessor.Left = successor.Right;
-                        if (successor.Right != null) successor.Right.Parent = parentSuccessor;
+                        Root = BalanceToRoot(current.Parent);
                     }
                     else
                     {
-                        current.Right = successor.Right;
-                        if (successor.Right != null) successor.Right.Parent = current;
+                        Root = replacement;
+                    }
+                }
+                else if (current.Right.Left == null)
+                {
+                    current.Right.Left = current.Left;
+                    current.Left.Parent = current.Right;
+                    current.Right.Parent = current.Parent;
+                    if (current.Parent != null)
+                    {
+                        if (current == current.Parent.Right) current.Parent.Right = current.Right;
+                        else current.Parent.Left = current.Right;
+                    }
+                    Root = BalanceToRoot(current.Right);
+                }
+                else
+                {
+                    var successor = current.Right.Left;
+
+                    while (successor.Left != null)
+                    {
+                        successor = successor.Left;
                     }
 
-                    current.Key = successor.Key;
-                    balanceFrom = parentSuccessor ?? current;
+                    successor.Parent.Left = successor.Right;
+                    if (successor.Right != null) successor.Right.Parent = successor.Parent;
+                    successor.Left = current.Left;
+                    current.Left.Parent = successor;
+                    successor.Right = current.Right;
+                    current.Right.Parent = successor;
+                    var successorParent = successor.Parent;
+                    successor.Parent = current.Parent;
+                    if (current.Parent != null)
+                    {
+                        if (current.Parent.Left == current) current.Parent.Left = successor;
+                        else current.Parent.Right = successor;
+                    }
+                    Root = BalanceToRoot(successorParent);
                 }
-
-                Root = BalanceToRoot(balanceFrom);
+                
             }
             Count--;
             return true;
@@ -161,9 +172,9 @@ namespace Trees
 
         public int Height => GetNodeHeight(Root);
 
-        public ICollection<TKey> Keys => new List<TKey>(from elem in this select elem.Key);
+        public ICollection<TKey> Keys => new List<TKey>(from element in this select element.Key);
 
-        public ICollection<TValue> Values => new List<TValue>(from elem in this select elem.Value);
+        public ICollection<TValue> Values => new List<TValue>(from element in this select element.Value);
 
         public bool IsReadOnly => false;
 
@@ -184,21 +195,21 @@ namespace Trees
             }
         }
 
-        private int GetNodeHeight(Node<TKey, TValue> node)
+        private int GetNodeHeight(Node node)
         {
             return (node != null) ? node.Height : 0;
         }
 
-        private int GetBalancingFactor(Node<TKey, TValue> node)
+        private int GetBalancingFactor(Node node)
         {
             return (node != null) ? (GetNodeHeight(node.Right) - GetNodeHeight(node.Left)) : 0;
         }
 
-        private void FixNodeHeight(Node<TKey, TValue> node)
+        private void FixNodeHeight(Node node)
         {
             if (node != null)
             {
-                node.Height = (byte)(Math.Max(GetNodeHeight(node.Left), GetNodeHeight(node.Right)) + 1);
+                node.Height = Math.Max(GetNodeHeight(node.Left), GetNodeHeight(node.Right)) + 1;
             }
         }
 
@@ -210,33 +221,51 @@ namespace Trees
             }
         }      
 
-        private Node<TKey, TValue> RotateRight(Node<TKey, TValue> node)
+        private Node RotateRight(Node node)
         {
-            var q = node.Left;
-            var b = q.Right;
-            node.Left = b;
-            if (b != null) b.Parent = node;
-            q.Right = node;
-            node.Parent = q;
+            var left = node.Left;
+            var leftRight = left.Right;
+
+            left.Right = node;
+            left.Parent = node.Parent;
+            if (node.Parent != null)
+            {
+                if (node == node.Parent.Right) node.Parent.Right = left;
+                else node.Parent.Left = left;
+            }
+            node.Parent = left;
+            node.Left = leftRight;
+            if (leftRight != null) leftRight.Parent = node;
+            
             FixNodeHeight(node);
-            FixNodeHeight(q);
-            return q;
+            FixNodeHeight(left);
+
+            return left;
         }
 
-        private Node<TKey, TValue> RotateLeft(Node<TKey, TValue> node)
+        private Node RotateLeft(Node node)
         {
-            var p = node.Right;
-            var b = p.Left;
-            node.Right = b;
-            if (b != null) b.Parent = node;
-            p.Left = node;
-            node.Parent = p;            
+            var right = node.Right;
+            var rightLeft = right.Left;
+
+            right.Left = node;
+            right.Parent = node.Parent;
+            if (node.Parent != null)
+            {
+                if (node == node.Parent.Right) node.Parent.Right = right;
+                else node.Parent.Left = right;
+            }
+            node.Parent = right;
+            node.Right = rightLeft;
+            if (rightLeft != null) rightLeft.Parent = node;
+                        
             FixNodeHeight(node);
-            FixNodeHeight(p);
-            return p;
+            FixNodeHeight(right);
+
+            return right;
         }
 
-        private Node<TKey, TValue> Balance(Node<TKey, TValue> node)
+        private Node Balance(Node node)
         {
             FixNodeHeight(node);
             var balanceFactor = GetBalancingFactor(node);
@@ -244,8 +273,7 @@ namespace Trees
             {
                 if (GetBalancingFactor(node.Right) < 0)
                 {
-                    node.Right = RotateRight(node.Right);
-                    node.Right.Parent = node;
+                    RotateRight(node.Right);
                 }
                 return RotateLeft(node);
             }
@@ -253,35 +281,27 @@ namespace Trees
             {
                 if (GetBalancingFactor(node.Left) > 0)
                 {
-                    node.Left = RotateLeft(node.Left);
-                    node.Left.Parent = node;
+                    RotateLeft(node.Left);
                 }
                 return RotateRight(node);
             }
             return node;
         }
 
-        private Node<TKey, TValue> BalanceToRoot(Node<TKey, TValue> node)
+        private Node BalanceToRoot(Node node)
         {
             if (node == null) return node;
             var current = node;
 
             while (current.Parent != null)
             {
-                var parent = current.Parent;               
-                bool right = parent.Right == current;
                 var oldHeight = current.Height;
-                current = Balance(current);                
-                current.Parent = parent;
-                if (right) parent.Right = current;
-                else parent.Left = current;
+                current = Balance(current);
                 if (oldHeight == current.Height) return Root;
-                current = parent;                
+                current = current.Parent;
             }
 
-            current = Balance(current);
-            current.Parent = null;
-            return current;
+            return Balance(current);
         }     
 
         public bool Remove(TKey key)
@@ -386,9 +406,9 @@ namespace Trees
             }
         }
 
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node<TKey, TValue> node)
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node node)
         {
-            Stack<Node<TKey, TValue>> stack = new Stack<Node<TKey, TValue>>(Count);
+            Stack<Node> stack = new Stack<Node>(Count);
             var current = node;
 
             while (current != null || stack.Count > 0)
@@ -409,7 +429,7 @@ namespace Trees
 
         // Function to print inorder traversal using parent pointer 
         // source https://www.geeksforgeeks.org/inorder-non-threaded-binary-tree-traversal-without-recursion-or-stack/
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversalUseParent(Node<TKey, TValue> node)
+        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversalUseParent(Node node)
         {
             var current = node;
             bool leftdone = false;
