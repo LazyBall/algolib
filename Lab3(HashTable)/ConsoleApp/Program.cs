@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 
 namespace ConsoleApp
 {
@@ -7,7 +7,13 @@ namespace ConsoleApp
         static void Main()
         {
             var worker = new Worker();
-            worker.RunBenchmark();
+            int i;
+            for ( i = 1; i < 11; i++)
+            {
+                Console.WriteLine("Test {0}:", i);
+                worker.RunBenchmark();
+                Console.WriteLine();
+            }
         }
     }
 }

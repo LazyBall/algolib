@@ -7,6 +7,12 @@ namespace HashTable
 {
     public class HashTable<TKey, TValue> : IDictionary<TKey, TValue>
     {
+        private static readonly int[] _primes =
+            new int[]
+            { 11, 23, 47, 97, 197, 397, 797, 1597, 3203, 6421, 12853, 25717, 51437, 102877, 205759,
+             411527, 823117, 1646237, 3292489, 6584983, 13169977, 26339969, 52679969, 105359939, 210719881,
+             421439783, 842879579, 1685759167, 1947484393, 2147483549, 2147483629, 2147483647 };
+
         public TValue this[TKey key]
         {
             get
@@ -48,95 +54,81 @@ namespace HashTable
 
         private readonly Entry _deleted = new Entry(default(TKey), default(TValue), 0);
         private Entry[] _entries;
-        private const double c1 = 0.5;
-        private const double c2 = 0.5;
-        //private const double _maxLoadFactor = 0.7;
-        private int _maxSteps;
-
-        private void CreateNewEntries()
-        {
-            _entries = new Entry[_entries.Length * 4];
-            _maxSteps += 1;            
-        }
+        private const double c1 = 0;
+        private const double c2 = 1;
+        private const double _maxLoadFactor = 0.6;
+        private int _primeIndex;
 
         public HashTable()
         {
-            _entries = new Entry[16];
-            _maxSteps = 1;
+            _primeIndex = 0;
+            _entries = new Entry[_primes[_primeIndex]];
         }
 
         private void Resize()
         {
             var oldArray = _entries;
-            CreateNewEntries();
+            _entries = new Entry[_primes[++_primeIndex]];
 
-            int i = 0, count = 0;
-            while (i < oldArray.Length && count < Count)
+            int count = 0;
+            for (int i = 0; count < Count && i < oldArray.Length; i++)
             {
                 var entry = oldArray[i];
-                i++;
                 if (entry != null && entry != _deleted)
                 {
-                    if (!TryToPut(entry))
-                    {
-                        CreateNewEntries();
-                        i = 0;
-                        count = 0;
-                    }
-                    else
-                    {
-                        count++;
-                    }
+                    Put(entry);
+                    count++;
                 }
             }
 
         }
 
-        private bool TryToPut(Entry entry)
+        private void Put(Entry entry)
         {
             int start = entry.HashCode;
-
-            for (int i = 0; i < _maxSteps; i++)
+            int i;
+            for (i = 0; i < _entries.Length; i++)
             {
-                int position = (int)(start + c1 * i + c2 * i * i) % _entries.Length;
+                var position = (int)(start + c1 * i + c2 * i * i) % _entries.Length;
                 if (_entries[position] == null)
                 {
                     _entries[position] = entry;
-                    return true;
+                    return;
                 }
-                else if (_entries[position] != _deleted)
+                else if (_entries[position] == _deleted)
                 {
-                    if (_entries[position].Key is IComparable<TKey> compKey)
-                    {
-                        if (compKey.CompareTo(entry.Key) == 0)
-                        {
-                            throw new ArgumentException();
-                        }
-                    }
-                    else if (_entries[position].Key.Equals(entry.Key))
-                    {
-                        throw new ArgumentException();
-                    }
+                    _entries[position] = entry;
+                    break;
+                }
+                else if (_entries[position].Key.Equals(entry.Key))
+                {
+                    throw new ArgumentException();
                 }
             }
 
-            return false;
+            for (i++; i < _entries.Length; i++)
+            {
+                var position = (int)(start + c1 * i + c2 * i * i) % _entries.Length;
+                var element = _entries[position];
+                if (element == null) return;
+                else if (element != _deleted && element.Key.Equals(entry.Key))
+                {
+                    throw new ArgumentException();
+                }
+            }
+
         }
 
         private void Insert(Entry entry)
         {
-            while (!TryToPut(entry))
+            Put(entry);
+            Count++;
+            if (Count >= _entries.Length * _maxLoadFactor)
             {
                 Resize();
             }
-
-            Count++;
-            //if (Count >= _entries.Length * _maxLoadFactor)
-            //{
-            //    Resize();
-            //}
         }
-        
+
         public void Add(TKey key, TValue value)
         {
             if (key == null) throw new ArgumentException();
@@ -151,8 +143,8 @@ namespace HashTable
 
         public void Clear()
         {
-            Array.Clear(_entries, 0, Count);
-            Count = 0;            
+            Array.Clear(_entries, 0, _entries.Length);
+            Count = 0;
         }
 
         private int FindEntry(TKey key)
@@ -160,22 +152,13 @@ namespace HashTable
             if (key == null) throw new ArgumentException();
             int start = key.GetHashCode() & 0x7fffffff;
 
-            for (int i = 0; i < _maxSteps; i++)
+            for (int i = 0; i < _entries.Length; i++)
             {
                 int position = (int)(start + c1 * i + c2 * i * i) % _entries.Length;
-                if (_entries[position] != null && _entries[position] != _deleted)
+                if (_entries[position] == null) return -1;
+                else if (_entries[position] != _deleted && _entries[position].Key.Equals(key))
                 {
-                    if (_entries[position].Key is IComparable<TKey> compKey)
-                    {
-                        if (compKey.CompareTo(key) == 0)
-                        {
-                            return position;
-                        }
-                    }
-                    else if (_entries[position].Key.Equals(key))
-                    {
-                        return position;
-                    }
+                    return position;
                 }
             }
 
