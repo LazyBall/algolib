@@ -7,7 +7,7 @@ using System.Linq;
 namespace Tests
 {
     [TestClass]
-    public class Test
+    public class Tests
     {
         int n = 10000;
 
@@ -15,10 +15,12 @@ namespace Tests
         {
             var random = new Random(DateTime.Now.Millisecond);
             var list = new List<int>(count);
+
             for (int i = 0; i < count; i++)
             {
                 list.Add(random.Next());
             }
+
             return list;
         }
 
@@ -102,10 +104,12 @@ namespace Tests
         public void TestCountWhenAdd()
         {
             var hashTable = new HashTable<int, int>();
+
             for (int i = 0; i < n; i++)
             {
                 hashTable.Add(i, i);
             }
+
             Assert.AreEqual(n, hashTable.Count);
         }
 
@@ -113,14 +117,17 @@ namespace Tests
         public void TestCountWhenRemove()
         {
             var hashTable = new HashTable<int,int>();
+
             for (int i = 0; i < n; i++)
             {
                 hashTable.Add(i, i);
             }
+
             for (int i = 0; i < n/2; i++)
             {
                 hashTable.Remove(i);
             }
+
             Assert.AreEqual(n - n/2, hashTable.Count);
         }       
 
@@ -137,16 +144,18 @@ namespace Tests
                 hashTable.Add(value, value);
             }
 
-            for (int i = n / 4; i < 3 * n / 4; i++)
+            for (int i = 0; i < n/2; i++)
             {
                 dict.Remove(uniqueValues[i]);
                 hashTable.Remove(uniqueValues[i]);
             }
 
             bool flag = true;
+
             foreach (var value in uniqueValues)
             {
-                flag = flag && (dict.ContainsKey(value) == hashTable.ContainsKey(value));
+                flag = flag && (dict.Contains(new KeyValuePair<int, int>(value, value)) 
+                    == hashTable.Contains(new KeyValuePair<int, int>(value, value)));
             }
 
             Assert.AreEqual(true, flag);
@@ -156,22 +165,24 @@ namespace Tests
         public void TestIEnumerator()
         {
             var uniqueValues = DoRandomUniqueValues(n);
-            var set = new HashSet<int>(uniqueValues);
-            var hashTable = new HashTable<int, int>();
-            bool flag = true;
+            var hashTable = new HashTable<int, int>();            
+
             foreach(var value in uniqueValues)
             {
                 hashTable.Add(value, value);
             }
 
+            bool flag = true;
             int i = 0;
-            foreach(var key in hashTable.Keys)
+            var set = new HashSet<int>();
+
+            foreach (var key in hashTable.Keys)
             {
-                flag = flag & set.Contains(key);
+                flag = flag && set.Add(key);
                 i++;
             }
-            flag = flag & (set.Count == i);
 
+            flag = flag && (set.Count == i);
             Assert.AreEqual(true, flag);
         }
     }

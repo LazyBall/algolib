@@ -42,52 +42,138 @@ namespace ConsoleApp
                 }
             }
         }
-
-        void InsertWords(IDictionary<string, int> hashTable, IEnumerable<string> words)
+           
+        class BenchmarkResult
         {
-            foreach (var word in words)
+            public long AddTimeInMs { get; set; }
+            public long RemoveTimeInMs { get; set; }
+            public long FindTimeInMs { get; set; }
+
+            public void Add(BenchmarkResult result)
             {
-                if (!hashTable.ContainsKey(word)) hashTable.Add(word, 1);
-                else hashTable[word]++;
+                this.AddTimeInMs += result.AddTimeInMs;
+                this.RemoveTimeInMs += result.RemoveTimeInMs;
+                this.FindTimeInMs += result.FindTimeInMs;
+            }
+
+            public override string ToString()
+            {
+                return
+                $"Add: {AddTimeInMs} ms\t" +
+                $"Remove: {RemoveTimeInMs} ms\t" +
+                $"Find: {FindTimeInMs} ms\t" +
+                $"Total: {AddTimeInMs + RemoveTimeInMs + FindTimeInMs} ms";
             }
         }
 
-        void DeleteWords(IDictionary<string, int> hashTable, IEnumerable<string> words)
+        void AddElements(IDictionary<string, int> dict, IEnumerable<string> words)
         {
             foreach (var word in words)
             {
-                hashTable.Remove(word);
+                if (!dict.ContainsKey(word)) dict.Add(word, 1);
+                else dict[word]++;
+            }
+
+            Console.WriteLine($"Elements after adding: {dict.Count}");
+        }
+
+        void RemoveElements(IDictionary<string, int> dict, IEnumerable<string> words)
+        {
+            foreach (var word in words)
+            {
+                dict.Remove(word);
+            }
+
+            Console.WriteLine($"Elements after removing: {dict.Count}");
+        }
+
+        void FindElements(IDictionary<string, int> dict, IEnumerable<string> array)
+        {
+            foreach (var element in array)
+            {
+                dict.ContainsKey(element);
             }
         }
 
-        void RunTest<T>(IEnumerable<string> insert, IEnumerable<string> delete)
+        BenchmarkResult RunBenchmark<T>(IEnumerable<string> array, IEnumerable<string> delete) 
             where T : IDictionary<string, int>, new()
         {
-            var hashTable = new T();
-            InsertWords(hashTable, insert);
-            Console.WriteLine("Number of elements after insertion: {0} elemets", hashTable.Count);
-            DeleteWords(hashTable, delete);
-            Console.WriteLine("Number of elements after deletion: {0} elemets", hashTable.Count);
+            var dict = new T();
+            var watch = new Stopwatch();
+            var result = new BenchmarkResult();
+
+            watch.Start();
+            AddElements(dict, array);
+            watch.Stop();
+            result.AddTimeInMs = watch.ElapsedMilliseconds;
+
+            watch.Restart();
+            RemoveElements(dict, delete);
+            watch.Stop();
+            result.RemoveTimeInMs = watch.ElapsedMilliseconds;
+
+            watch.Restart();
+            FindElements(dict, array);
+            watch.Stop();
+            result.FindTimeInMs = watch.ElapsedMilliseconds;
+
+            return result;
         }
 
-        public void RunBenchmark()
+        void RunTest(IEnumerable<string> array, IEnumerable<string> delete, BenchmarkResult totalResultDict = null,
+            BenchmarkResult totalResultHash = null)
         {
-            var array = DoWords(ReadFileByCharacter("WarAndWorld.txt")).ToArray();
-            var del = (from w in array where w.Length == 7 select w).ToArray();
-            var watch = new Stopwatch();
+            Console.WriteLine("Dictionary:\t");
+            var result = RunBenchmark<Dictionary<string, int>>(array, delete);
+            totalResultDict?.Add(result);
+            Console.WriteLine(result.ToString());
 
-            Console.WriteLine("Dictionary");
-            watch.Start();
-            RunTest<Dictionary<string, int>>(array, del);
-            watch.Stop();
-            Console.WriteLine("Time: {0} ms.", watch.ElapsedMilliseconds);
             Console.WriteLine();
 
-            Console.WriteLine("HashTable");
-            watch.Restart();
-            RunTest<HashTable<string, int>>(array, del);
-            watch.Stop();
-            Console.WriteLine("Time: {0} ms.", watch.ElapsedMilliseconds);
+            Console.WriteLine("HashTable:\t\t");
+            result = RunBenchmark<HashTable<string, int>>(array, delete);
+            totalResultHash?.Add(result);
+            Console.WriteLine(result.ToString());
+
+            Console.WriteLine();
+        }
+
+        BenchmarkResult CreateAverageValue(BenchmarkResult totalResult, int numberOfTests)
+        {
+            return new BenchmarkResult()
+            {
+                AddTimeInMs = totalResult.AddTimeInMs / numberOfTests,
+                RemoveTimeInMs = totalResult.RemoveTimeInMs / numberOfTests,
+                FindTimeInMs = totalResult.FindTimeInMs / numberOfTests
+            };
+        }
+
+        public void ShowInfo(int numberOfTests)
+        {
+            var totalResultDict = new BenchmarkResult();
+            var totalResultHash = new BenchmarkResult();
+            var words = DoWords(ReadFileByCharacter("WarAndWorld.txt")).ToArray();
+            var delete = (from t in words where t.Length == 7 select t).ToArray();
+
+            for (int i = 0; i < numberOfTests; i++)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Test: {0}", i + 1);
+                Console.ForegroundColor = ConsoleColor.White;
+                RunTest(words, delete, totalResultDict, totalResultHash);
+            }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Average: ");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            Console.WriteLine("Dictionary: \t");
+            Console.WriteLine(CreateAverageValue(totalResultDict, numberOfTests).ToString());
+            Console.WriteLine();
+
+            Console.WriteLine("HashTable: \t");
+            Console.WriteLine(CreateAverageValue(totalResultHash, numberOfTests).ToString());
+            
         }
     }
 }
