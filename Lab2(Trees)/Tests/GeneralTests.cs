@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tests
 {
@@ -22,19 +23,14 @@ namespace Tests
         private int[] DoRandomUniqueValues(int count)
         {
             var random = new Random(DateTime.Now.Millisecond);
-            int[] array = new int[count];
             var hashset = new HashSet<int>();
-            for (int i = 0; i < count; i++)
+
+            while (hashset.Count < count)
             {
-                var value = random.Next();
-                while (hashset.Contains(value))
-                {
-                    value = random.Next();
-                }
-                hashset.Add(value);
-                array[i] = value;
+                hashset.Add(random.Next());
             }
-            return array;
+
+            return hashset.ToArray();
         }
 
         public  void TestContainsKey(int n)

@@ -113,22 +113,25 @@ namespace ConsoleApp
             BenchmarkResult totalResultAVL = null, BenchmarkResult totalResultBin = null, 
             BenchmarkResult totalResultDimas = null)
         {
-            Console.Write("SortedDictionary:\t");
+            Console.WriteLine("SortedDictionary:\t");
             var result = RunBenchmark<SortedDictionary<int, int>>(array, delete);
             totalResultSD?.Add(result);
             Console.WriteLine(result.ToString());
+            Console.WriteLine();
 
-            Console.Write("AVLTree:\t\t");
+            Console.WriteLine("AVLTree:\t\t");
             result = RunBenchmark<AVLTree<int, int>>(array, delete);
             totalResultAVL?.Add(result);
             Console.WriteLine(result.ToString());
+            Console.WriteLine();
 
-            Console.Write("BinarySearchTree:\t");
+            Console.WriteLine("BinarySearchTree:\t");
             result = RunBenchmark<BinarySearchTree<int, int>>(array, delete);
             totalResultBin?.Add(result);
             Console.WriteLine(result.ToString());
+            Console.WriteLine();
 
-            Console.Write("Dimas:\t\t\t");
+            Console.WriteLine("Dimas:\t\t\t");
             result = RunBenchmark<DimasAVLTree<int, int>>(array, delete);
             totalResultDimas?.Add(result);
             Console.WriteLine(result.ToString());
@@ -177,9 +180,8 @@ namespace ConsoleApp
 
             Console.Write("BinarySearchTree: \t");
             Console.WriteLine(CreateAverageValue(totalResultBin, numberOfTests).ToString());
-            Console.WriteLine();
 
-            Console.Write("Dimas:\t\t\t");
+            Console.Write("Dimas: \t\t\t");
             Console.WriteLine(CreateAverageValue(totalResultDimas, numberOfTests).ToString());
             Console.WriteLine();
 
