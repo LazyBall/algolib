@@ -66,6 +66,11 @@ namespace MyLibrary.DataStructures
         readonly Node[] _head;
         int _currentLevel;
 
+        public SkipList() : this(8, 0.5)
+        {
+
+        }
+
         public SkipList(int numberOfLevels = 8, double probability = 0.5)
         {
             if (numberOfLevels < 1) throw new ArgumentException("number of levels is less than 1.");
@@ -254,6 +259,7 @@ namespace MyLibrary.DataStructures
             }
 
             _currentLevel = 0;
+            Count = 0;
         }
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
