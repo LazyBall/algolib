@@ -41,21 +41,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithms\HeapSort.cs" />
+    <Compile Include="Algorithms\QuickSort.cs" />
     <Compile Include="Data Structures\HashTable\HashTable.cs" />
+    <Compile Include="Data Structures\Heap\BinaryHeap.cs" />
     <Compile Include="Data Structures\SkipList\SkipList.cs" />
-    <Compile Include="Data Structures\Trees\AVLTree.cs" />
-    <Compile Include="Data Structures\Trees\BinarySearchTree.cs" />
-    <Compile Include="Data Structures\Trees\DimasAVLTree.cs" />
-    <Compile Include="Data Structures\Trees\DimasBinarySearchTree.cs" />
+    <Compile Include="Data Structures\Tree\AVLTree.cs" />
+    <Compile Include="Data Structures\Tree\BinarySearchTree.cs" />
+    <Compile Include="Data Structures\Tree\DimasAVLTree.cs" />
+    <Compile Include="Data Structures\Tree\DimasBinarySearchTree.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Algorithms\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="Data Structures\HashTable\Task.txt" />
+    <Content Include="Data Structures\Heap\Task.txt" />
     <Content Include="Data Structures\SkipList\Task.txt" />
-    <Content Include="Data Structures\Trees\Task.txt" />
+    <Content Include="Data Structures\Tree\Task.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
