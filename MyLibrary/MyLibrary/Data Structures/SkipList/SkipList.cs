@@ -79,7 +79,7 @@ namespace MyLibrary.DataStructures
         readonly Node[] _head;
         int _currentLevel;
 
-        public SkipList() : this(8, 0.5)
+        public SkipList() : this(16, 0.5)
         {
 
         }

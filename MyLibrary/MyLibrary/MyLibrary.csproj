@@ -53,11 +53,5 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <Content Include="Data Structures\HashTable\Task.txt" />
-    <Content Include="Data Structures\Heap\Task.txt" />
-    <Content Include="Data Structures\SkipList\Task.txt" />
-    <Content Include="Data Structures\Tree\Task.txt" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
