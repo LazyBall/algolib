@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MyLibrary">
+      <HintPath>..\..\MyLibrary\MyLibrary\bin\Debug\MyLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -52,12 +55,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Task.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HashTable\HashTable.csproj">
-      <Project>{7d77aeec-7336-4aad-9524-b775d3287a3d}</Project>
-      <Name>HashTable</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MyLibrary">
+      <HintPath>..\..\MyLibrary\MyLibrary\bin\Debug\MyLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,12 +52,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Trees\Trees.csproj">
-      <Project>{6234aeb2-3bae-490b-b91a-366b643ad792}</Project>
-      <Name>Trees</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Task.txt" />

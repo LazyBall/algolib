@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Trees;
 using System.Linq;
+using MyLibrary.DataStructures;
 
 namespace ConsoleApp
 {
