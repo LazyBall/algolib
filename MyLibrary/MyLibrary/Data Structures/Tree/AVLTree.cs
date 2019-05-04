@@ -36,6 +36,69 @@ namespace MyLibrary.DataStructures
 
         public int Count { get; private set; }
 
+        //public int Height => GetNodeHeight(_root);
+
+        public ICollection<TKey> Keys => new List<TKey>(from node in this.EnumerateNodes()
+                                                        select node.Key);
+
+        public ICollection<TValue> Values => new List<TValue>(from node in this.EnumerateNodes()
+                                                              select node.Value);
+
+        public bool IsReadOnly => false;
+
+        public TValue this[TKey key]
+        {
+            get
+            {
+                if (TryGetValue(key, out TValue value))
+                {
+                    return value;
+                }
+                else
+                {
+                    throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
+                }
+            }
+
+            set
+            {
+                var node = FindNode(key);
+                if (node == null)
+                {
+                    throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
+                }
+                else
+                {
+                    node.Value = value;
+                }
+            }
+        }
+
+        private int GetNodeHeight(Node node) => ((node != null) ? node.Height : 0);
+
+        private int GetBalancingFactor(Node node)
+        {
+            return (node != null) ? (GetNodeHeight(node.Right) - GetNodeHeight(node.Left)) : 0;
+        }
+
+        private void FixNodeHeight(Node node)
+        {
+            if (node != null)
+            {
+                node.Height = Math.Max(GetNodeHeight(node.Left), GetNodeHeight(node.Right)) + 1;
+            }
+        }
+
+        private void CheckKey(TKey key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is null.");
+            }
+        }
+
         public void Add(TKey key, TValue value)
         {
             CheckKey(key);
@@ -64,8 +127,14 @@ namespace MyLibrary.DataStructures
             current = new Node(key, value, parent: parentCurrent);
             if (parentCurrent != null)
             {
-                if (parentCurrent.Key.CompareTo(current.Key) > 0) parentCurrent.Left = current;
-                else parentCurrent.Right = current;
+                if (parentCurrent.Key.CompareTo(current.Key) > 0)
+                {
+                    parentCurrent.Left = current;
+                }
+                else
+                {
+                    parentCurrent.Right = current;
+                }
                 _root = BalanceToRoot(parentCurrent);
             }
             else
@@ -109,15 +178,23 @@ namespace MyLibrary.DataStructures
             }
             else
             {
-
                 if (current.Left == null || current.Right == null)
                 {
                     var replacement = current.Left ?? current.Right;
-                    if (replacement != null) replacement.Parent = current.Parent;
+                    if (replacement != null)
+                    {
+                        replacement.Parent = current.Parent;
+                    }
                     if (current.Parent != null)
                     {
-                        if (current == current.Parent.Right) current.Parent.Right = replacement;
-                        else current.Parent.Left = replacement;
+                        if (current == current.Parent.Right)
+                        {
+                            current.Parent.Right = replacement;
+                        }
+                        else
+                        {
+                            current.Parent.Left = replacement;
+                        }
                         _root = BalanceToRoot(current.Parent);
                     }
                     else
@@ -132,8 +209,14 @@ namespace MyLibrary.DataStructures
                     current.Right.Parent = current.Parent;
                     if (current.Parent != null)
                     {
-                        if (current == current.Parent.Right) current.Parent.Right = current.Right;
-                        else current.Parent.Left = current.Right;
+                        if (current == current.Parent.Right)
+                        {
+                            current.Parent.Right = current.Right;
+                        }
+                        else
+                        {
+                            current.Parent.Left = current.Right;
+                        }
                     }
                     _root = BalanceToRoot(current.Right);
                 }
@@ -147,7 +230,10 @@ namespace MyLibrary.DataStructures
                     }
 
                     successor.Parent.Left = successor.Right;
-                    if (successor.Right != null) successor.Right.Parent = successor.Parent;
+                    if (successor.Right != null)
+                    {
+                        successor.Right.Parent = successor.Parent;
+                    }
                     successor.Left = current.Left;
                     current.Left.Parent = successor;
                     successor.Right = current.Right;
@@ -156,8 +242,14 @@ namespace MyLibrary.DataStructures
                     successor.Parent = current.Parent;
                     if (current.Parent != null)
                     {
-                        if (current.Parent.Left == current) current.Parent.Left = successor;
-                        else current.Parent.Right = successor;
+                        if (current.Parent.Left == current)
+                        {
+                            current.Parent.Left = successor;
+                        }
+                        else
+                        {
+                            current.Parent.Right = successor;
+                        }
                     }
                     _root = BalanceToRoot(successorParent);
                 }                
@@ -165,74 +257,32 @@ namespace MyLibrary.DataStructures
             Count--;
             return true;
         }
-
-        public int Height => GetNodeHeight(_root);
-
-        public ICollection<TKey> Keys => new List<TKey>(from item in this select item.Key);
-
-        public ICollection<TValue> Values => new List<TValue>(from item in this select item.Value);
-
-        public bool IsReadOnly => false;
-
-        public TValue this[TKey key]
-        {
-            get
-            {
-                if (TryGetValue(key, out TValue value)) return value;
-                else throw new KeyNotFoundException
-                        ("The property is retrieved and key does not exist in the collection.");
-            }
-            set
-            {
-                var node = FindNode(key);
-                if (node == null) throw new KeyNotFoundException
-                        ("The property is retrieved and key does not exist in the collection.");
-                else node.Value = value;
-            }
-        }
-
-        private int GetNodeHeight(Node node) => ((node != null) ? node.Height : 0);
-
-        private int GetBalancingFactor(Node node)
-        {
-            return (node != null) ? (GetNodeHeight(node.Right) - GetNodeHeight(node.Left)) : 0;
-        }
-
-        private void FixNodeHeight(Node node)
-        {
-            if (node != null)
-            {
-                node.Height = Math.Max(GetNodeHeight(node.Left), GetNodeHeight(node.Right)) + 1;
-            }
-        }
-
-        private void CheckKey(TKey key)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException("key is null.");
-            }
-        }      
-
+         
         private Node RotateRight(Node node)
         {
             var left = node.Left;
             var leftRight = left.Right;
-
             left.Right = node;
             left.Parent = node.Parent;
             if (node.Parent != null)
             {
-                if (node == node.Parent.Right) node.Parent.Right = left;
-                else node.Parent.Left = left;
+                if (node == node.Parent.Right)
+                {
+                    node.Parent.Right = left;
+                }
+                else
+                {
+                    node.Parent.Left = left;
+                }
             }
             node.Parent = left;
             node.Left = leftRight;
-            if (leftRight != null) leftRight.Parent = node;
-            
+            if (leftRight != null)
+            {
+                leftRight.Parent = node;
+            }           
             FixNodeHeight(node);
             FixNodeHeight(left);
-
             return left;
         }
 
@@ -240,21 +290,27 @@ namespace MyLibrary.DataStructures
         {
             var right = node.Right;
             var rightLeft = right.Left;
-
             right.Left = node;
             right.Parent = node.Parent;
             if (node.Parent != null)
             {
-                if (node == node.Parent.Right) node.Parent.Right = right;
-                else node.Parent.Left = right;
+                if (node == node.Parent.Right)
+                {
+                    node.Parent.Right = right;
+                }
+                else
+                {
+                    node.Parent.Left = right;
+                }
             }
             node.Parent = right;
             node.Right = rightLeft;
-            if (rightLeft != null) rightLeft.Parent = node;
-                        
+            if (rightLeft != null)
+            {
+                rightLeft.Parent = node;
+            }                        
             FixNodeHeight(node);
             FixNodeHeight(right);
-
             return right;
         }
 
@@ -283,14 +339,20 @@ namespace MyLibrary.DataStructures
 
         private Node BalanceToRoot(Node node)
         {
-            if (node == null) return node;
+            if (node == null)
+            {
+                return node;
+            }
             var current = node;
 
             while (current.Parent != null)
             {
                 var oldHeight = current.Height;
                 current = Balance(current);
-                if (oldHeight == current.Height) return _root;
+                if (oldHeight == current.Height)
+                {
+                    return _root;
+                }
                 current = current.Parent;
             }
 
@@ -369,7 +431,7 @@ namespace MyLibrary.DataStructures
 
         }
 
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node node)
+        private IEnumerable<Node> DoInorderTraversal(Node node)
         {
             Stack<Node> stack = new Stack<Node>(Count);
             var current = node;
@@ -385,14 +447,14 @@ namespace MyLibrary.DataStructures
 
                 current = stack.Pop();
                 Console.WriteLine(current.Key);
-                yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                yield return current;
                 current = current.Right;
             }
         }
 
         // Function to print inorder traversal using parent pointer 
         // source https://www.geeksforgeeks.org/inorder-non-threaded-binary-tree-traversal-without-recursion-or-stack/
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversalUseParent(Node node)
+        private IEnumerable<Node> DoInorderTraversalUseParent(Node node)
         {
             var current = node;
             bool leftdone = false;
@@ -411,7 +473,7 @@ namespace MyLibrary.DataStructures
                 }
 
                 // Return root's data 
-                yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                yield return current;
 
                 // Mark left as done 
                 leftdone = true;
@@ -442,12 +504,24 @@ namespace MyLibrary.DataStructures
             }
         }
 
+        private IEnumerable<Node> EnumerateNodes()
+        {
+
+            foreach(var node in DoInorderTraversalUseParent(_root))
+            {
+                yield return node;
+            }
+
+        }
+
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            foreach (var item in DoInorderTraversalUseParent(_root))
+
+            foreach (var node in this.EnumerateNodes())
             {
-                yield return item;
+                yield return new KeyValuePair<TKey, TValue>(node.Key, node.Value);
             }
+
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

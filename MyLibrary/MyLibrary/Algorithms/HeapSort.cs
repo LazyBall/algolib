@@ -11,7 +11,7 @@ namespace MyLibrary.Algorithms
 
             for (int i = array.Length - 1; i >= 0; i--)
             {
-                array[i] = binHeap.Pop();
+                array[i] = binHeap.Dequeue();
             }
 
         }

@@ -25,11 +25,58 @@ namespace MyLibrary.DataStructures
                 this.Left = left;
                 this.Right = right;
             }
+
         }
 
         private Node _root;
 
-        public int Count { get; private set; }
+        public int Count { get; private set; }        
+
+        public TValue this[TKey key]
+        {
+            get
+            {
+                if (TryGetValue(key, out TValue value))
+                {
+                    return value;
+                }
+                else
+                {
+                    throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
+                }
+            }
+
+            set
+            {
+                var node = FindNode(key);
+                if (node == null)
+                {
+                    throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
+                }
+                else
+                {
+                    node.Value = value;
+                }
+            }
+        }
+
+        public ICollection<TKey> Keys => new List<TKey>(from node in this.EnumerateNodes()
+                                                        select node.Key);
+
+        public ICollection<TValue> Values => new List<TValue>(from node in this.EnumerateNodes()
+                                                              select node.Value);
+
+        public bool IsReadOnly => false;
+
+        private void CheckKey(TKey key)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is null.");
+            }
+        }
 
         public void Add(TKey key, TValue value)
         {
@@ -81,6 +128,35 @@ namespace MyLibrary.DataStructures
                 {
                     return current;
                 }
+            }
+
+            return null;
+        }
+
+        private Node FindNodeWithParent(TKey key, out Node parent)
+        {
+            CheckKey(key);
+            parent = null;
+            var current = _root;
+
+            while (current != null)
+            {
+                int comparisonResult = current.Key.CompareTo(key);
+                Node next = null;
+                if (comparisonResult > 0)
+                {
+                    next = current.Left;
+                }
+                else if (comparisonResult < 0)
+                {
+                    next = current.Right;
+                }
+                else
+                {
+                    return current;
+                }
+                parent = current;
+                current = next;
             }
 
             return null;
@@ -153,41 +229,9 @@ namespace MyLibrary.DataStructures
             Count--;
             return true;
         }
-
-        private void CheckKey(TKey key)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException("key is null.");
-            }
-        }
-
-        public TValue this[TKey key]
-        {
-            get
-            {
-                if (TryGetValue(key, out TValue value)) return value;
-                else throw new KeyNotFoundException
-                        ("The property is retrieved and key does not exist in the collection.");
-
-            }
-            set
-            {
-                var node = FindNode(key);
-                if (node == null) throw new KeyNotFoundException
-                        ("The property is retrieved and key does not exist in the collection.");
-                else node.Value = value;
-            }
-        }        
-
-        public ICollection<TKey> Keys => new List<TKey>(from item in this select item.Key);
-
-        public ICollection<TValue> Values => new List<TValue>(from item in this select item.Value);
-
-        public bool IsReadOnly => false;       
-
+            
         //source: https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion/
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoInorderTraversal(Node node)
+        private IEnumerable<Node> DoInorderTraversal(Node node)
         {
             Stack<Node> stack = new Stack<Node>(Count);
             var current = node;
@@ -202,13 +246,14 @@ namespace MyLibrary.DataStructures
                 }
 
                 current = stack.Pop();
-                yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                yield return current;
                 current = current.Right;
             }
+
         }
 
         //source: https://www.geeksforgeeks.org/inorder-tree-traversal-without-recursion-and-without-stack/
-        private IEnumerable<KeyValuePair<TKey, TValue>> DoMorrisTraversal(Node node)
+        private IEnumerable<Node> DoMorrisTraversal(Node node)
         {
             Node current, pre;
             current = node;
@@ -217,7 +262,7 @@ namespace MyLibrary.DataStructures
             {
                 if (current.Left == null)
                 {
-                    yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                    yield return current;
                     current = current.Right;
                 }
                 else
@@ -245,7 +290,7 @@ namespace MyLibrary.DataStructures
                     else
                     {
                         pre.Right = null;
-                        yield return new KeyValuePair<TKey, TValue>(current.Key, current.Value);
+                        yield return current;
                         current = current.Right;
                     } /* End of if condition pre->right == NULL */
 
@@ -253,36 +298,7 @@ namespace MyLibrary.DataStructures
             }  
 
         }        
-
-        private Node FindNodeWithParent(TKey key, out Node parent)
-        {
-            CheckKey(key);
-            parent = null;
-            var current = _root;
-
-            while (current != null)
-            {
-                int comparisonResult = current.Key.CompareTo(key);
-                Node next = null;
-                if (comparisonResult > 0)
-                {
-                    next = current.Left;
-                }
-                else if (comparisonResult < 0)
-                {
-                    next = current.Right;
-                }
-                else
-                {
-                    return current;
-                }
-                parent = current;
-                current = next;
-            }
-
-            return null;
-        }
-
+        
         public void Add(KeyValuePair<TKey, TValue> item)
         {
             Add(item.Key, item.Value);
@@ -299,8 +315,14 @@ namespace MyLibrary.DataStructures
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
             var node = FindNode(item.Key);
-            if (node == null) return false;
-            else return item.Value.Equals(node.Value);
+            if (node == null)
+            {
+                return false;
+            }
+            else
+            {
+                return item.Value.Equals(node.Value);
+            }
         }
 
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
@@ -333,8 +355,14 @@ namespace MyLibrary.DataStructures
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             var node = FindNodeWithParent(item.Key, out Node parent);
-            if (node == null || !item.Value.Equals(node.Value)) return false;
-            else return RemoveNode(node, parent);            
+            if (node == null || !item.Value.Equals(node.Value))
+            {
+                return false;
+            }
+            else
+            {
+                return RemoveNode(node, parent);
+            }
         }
 
         public bool TryGetValue(TKey key, out TValue value)
@@ -352,12 +380,24 @@ namespace MyLibrary.DataStructures
             }
         }
 
+        private IEnumerable<Node> EnumerateNodes()
+        {
+
+            foreach(var node in DoInorderTraversal(_root))
+            {
+                yield return node;
+            }
+
+        }
+
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            foreach (var item in DoInorderTraversal(_root))
+
+            foreach (var node in this.EnumerateNodes())
             {
-                yield return item;
+                yield return new KeyValuePair<TKey, TValue>(node.Key, node.Value);
             }
+
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

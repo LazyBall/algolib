@@ -29,9 +29,11 @@ namespace MyLibrary.DataStructures
 
         public int Count { get; private set; }
 
-        public ICollection<TKey> Keys => new List<TKey>(from item in this select item.Key);
+        public ICollection<TKey> Keys => new List<TKey>(from node in this.EnumerateNodes()
+                                                        select node.Key);
 
-        public ICollection<TValue> Values => new List<TValue>(from item in this select item.Value);
+        public ICollection<TValue> Values => new List<TValue>(from node in this.EnumerateNodes()
+                                                              select node.Value);
 
         public bool IsReadOnly => false;
 
@@ -39,25 +41,36 @@ namespace MyLibrary.DataStructures
         {
             get
             {
-                if (TryGetValue(key, out TValue value)) return value;
-                else throw new KeyNotFoundException
+                if (TryGetValue(key, out TValue value))
+                {
+                    return value;
+                }
+                else
+                {
+                    throw new KeyNotFoundException
                         ("The property is retrieved and key does not exist in the collection.");
+                }
             }
 
             set
             {
                 var node = FindNode(key);
-                if (node == null) throw new KeyNotFoundException
-                        ("The property is retrieved and key does not exist in the collection.");
-
-                do
+                if (node == null)
                 {
-                    node.Value = value;
-                    node = node.Down;
-                } while (node != null);
+                    throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
+                }
+                else
+                {
 
+                    do
+                    {
+                        node.Value = value;
+                        node = node.Down;
+                    } while (node != null);
+
+                }
             }
-
         }
 
         readonly double _probability;
@@ -71,12 +84,16 @@ namespace MyLibrary.DataStructures
 
         }
 
-        public SkipList(int numberOfLevels = 8, double probability = 0.5)
+        public SkipList(int numberOfLevels, double probability)
         {
-            if (numberOfLevels < 1) throw new ArgumentException("number of levels is less than 1.");
+            if (numberOfLevels < 1)
+            {
+                throw new ArgumentException("number of levels is less than 1.");
+            }
             if (probability < 0 || probability > 1)
+            {
                 throw new ArgumentException("probability value does not belong to the range from 0 to 1.");
-
+            }
             this._probability = probability;
             this._maxLevel = numberOfLevels;
             _head = new Node[_maxLevel];
@@ -93,7 +110,10 @@ namespace MyLibrary.DataStructures
 
         public void Add(TKey key, TValue value)
         {
-            if (key == null) throw new ArgumentNullException("key is null.");
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is null.");
+            }
             var previousItems = new Node[_maxLevel];
             var current = _head[_currentLevel];
 
@@ -106,9 +126,10 @@ namespace MyLibrary.DataStructures
                 }
 
                 if (current.Right?.Key.CompareTo(key) == 0)
+                {
                     throw new ArgumentException("An element with the same key already exists " +
                         "in the SkipList<TKey,TValue>.");
-
+                }
                 previousItems[i] = current;
                 current = current.Down;
             }
@@ -123,6 +144,7 @@ namespace MyLibrary.DataStructures
             // если высота больше текущего  уровня в SkipList, добавим недостающие элементы 
             if (height > _currentLevel)
             {
+
                 for (int i = _currentLevel + 1; i <= height; i++)
                 {
                     previousItems[i] = _head[i];
@@ -158,20 +180,28 @@ namespace MyLibrary.DataStructures
 
         private Node FindNode(TKey key)
         {
-            if (key == null) throw new ArgumentNullException("key is null.");
-
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is null.");
+            }
             var current = _head[_currentLevel];
 
             for (int i = _currentLevel; i >= 0; i--)
             {
+
                 while (current.Right != null && current.Right.Key.CompareTo(key) < 0)
                 {
                     current = current.Right;
                 }
 
-                if (current.Right?.Key.CompareTo(key) == 0) return current.Right;
-
-                current = current.Down;
+                if (current.Right?.Key.CompareTo(key) == 0)
+                {
+                    return current.Right;
+                }
+                else
+                {
+                    current = current.Down;
+                }
             }
 
             return null;
@@ -179,13 +209,16 @@ namespace MyLibrary.DataStructures
 
         private Node FindNodeWithParent(TKey key, out Node parent)
         {
-            if (key == null) throw new ArgumentNullException("key is null.");
-
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is null.");
+            }
             var current = _head[_currentLevel];
             parent = null;
 
             for (int i = _currentLevel; i >= 0; i--)
             {
+
                 while (current.Right != null && current.Right.Key.CompareTo(key) < 0)
                 {
                     current = current.Right;
@@ -196,8 +229,10 @@ namespace MyLibrary.DataStructures
                     parent = current;
                     return current.Right;
                 }
-
-                current = current.Down;
+                else
+                {
+                    current = current.Down;
+                }        
             }
 
             return null;
@@ -210,6 +245,7 @@ namespace MyLibrary.DataStructures
 
             do
             {
+
                 while (nodeParent.Right.Key.CompareTo(node.Key) < 0)
                 {
                     nodeParent = nodeParent.Right;
@@ -226,8 +262,14 @@ namespace MyLibrary.DataStructures
         public bool Remove(TKey key)
         {
             var node = FindNodeWithParent(key, out Node nodeParent);
-            if (node == null) return false;
-            else return RemoveNode(node, nodeParent);
+            if (node == null)
+            {
+                return false;
+            }
+            else
+            {
+                return RemoveNode(node, nodeParent);
+            }
         }
 
         public bool TryGetValue(TKey key, out TValue value)
@@ -265,13 +307,22 @@ namespace MyLibrary.DataStructures
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
             var node = FindNode(item.Key);
-            if (node == null) return false;
-            else return node.Value.Equals(item.Value);
+            if (node == null)
+            {
+                return false;
+            }
+            else
+            {
+                return node.Value.Equals(item.Value);
+            }
         }
 
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            if (array == null) throw new ArgumentNullException("array is null.");
+            if (array == null)
+            {
+                throw new ArgumentNullException("array is null.");
+            }
             if (arrayIndex < 0)
             {
                 throw new ArgumentOutOfRangeException("arrayIndex is less than 0.");
@@ -286,27 +337,45 @@ namespace MyLibrary.DataStructures
 
             foreach (var elem in this)
             {
-                array[arrayIndex++] = elem;
+                array[arrayIndex] = elem;
+                arrayIndex++;
             }
+
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
             var node = FindNodeWithParent(item.Key, out Node nodeParent);
-            if (node == null || !node.Value.Equals(item.Value)) return false;
-            else return RemoveNode(node, nodeParent);
+            if (node == null || !node.Value.Equals(item.Value))
+            {
+                return false;
+            }
+            else
+            {
+                return RemoveNode(node, nodeParent);
+            }
         }
 
-        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+        private IEnumerable<Node> EnumerateNodes()
         {
             var node = _head[0].Right;
 
             while (node != null)
             {
-                yield return new KeyValuePair<TKey, TValue>(node.Key, node.Value);
+                yield return node;
                 node = node.Right;
             }
 
+        }
+
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+        {
+
+            foreach(var node in this.EnumerateNodes())
+            {
+                yield return new KeyValuePair<TKey, TValue>(node.Key, node.Value);
+            }
+      
         }
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();

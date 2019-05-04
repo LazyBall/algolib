@@ -10,7 +10,13 @@ namespace MyLibrary.DataStructures
 
         private T[] _array;
 
-        public BinaryHeap(int capacity = 16)
+        public BinaryHeap()
+        {
+            _array = new T[16];
+            Count = 0;
+        }
+
+        public BinaryHeap(int capacity)
         {
             _array = new T[capacity];
             Count = 0;
@@ -107,15 +113,30 @@ namespace MyLibrary.DataStructures
             }
         }
 
-        public T Pop()
+        public T Dequeue()
         {
             var value = Peek();
-            if (--Count > 0)
+            Count--;
+            if (Count > 0)
             {
                 _array[0] = _array[Count];
                 Heapify(0);
             }
             return value;
+        }
+
+        public bool Contains(T item)
+        {
+
+            for (int i = 0; i < Count; i++)
+            {
+                if (_array[i].CompareTo(item) == 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
     }

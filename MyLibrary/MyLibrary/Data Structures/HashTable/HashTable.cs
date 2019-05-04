@@ -13,32 +13,6 @@ namespace MyLibrary.DataStructures
              411527, 823117, 1646237, 3292489, 6584983, 13169977, 26339969, 52679969, 105359939, 210719881,
              421439783, 842879579, 1685759167, 1947484393, 2147483549, 2147483629, 2147483647 };
 
-        public TValue this[TKey key]
-        {
-            get
-            {
-                if (TryGetValue(key, out TValue value)) return value;
-                else throw new KeyNotFoundException
-                        ("The property is retrieved and key does not exist in the collection.");
-            }
-
-            set
-            {
-                var position = FindEntry(key);
-                if (position < 0) throw new KeyNotFoundException
-                        ("The property is retrieved and key does not exist in the collection.");
-                _entries[position].Value = value;
-            }
-        }
-
-        public ICollection<TKey> Keys => new List<TKey>(from item in this select item.Key);
-
-        public ICollection<TValue> Values => new List<TValue>(from item in this select item.Value);
-
-        public int Count { get; private set; }
-
-        public bool IsReadOnly => false;
-
         private class Entry
         {
             public int HashCode { get; private set; }
@@ -51,7 +25,48 @@ namespace MyLibrary.DataStructures
                 this.Value = value;
                 this.HashCode = hashCode;
             }
+
         }
+
+        public TValue this[TKey key]
+        {
+            get
+            {
+                if (TryGetValue(key, out TValue value))
+                {
+                    return value;
+                }
+                else
+                {
+                    throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
+                }
+            }
+
+            set
+            {
+                var position = FindEntry(key);
+                if (position < 0)
+                {
+                    throw new KeyNotFoundException
+                        ("The property is retrieved and key does not exist in the collection.");
+                }
+                else
+                {
+                    _entries[position].Value = value;
+                }
+            }
+        }
+
+        public ICollection<TKey> Keys => new List<TKey>(from entry in this.EnumerateEntries()
+                                                        select entry.Key);
+
+        public ICollection<TValue> Values => new List<TValue>(from entry in this.EnumerateEntries()
+                                                              select entry.Value);
+
+        public int Count { get; private set; }
+
+        public bool IsReadOnly => false;
 
         private readonly Entry _deleted;
         private Entry[] _entries;
@@ -70,16 +85,17 @@ namespace MyLibrary.DataStructures
         private void Resize()
         {
             var oldArray = _entries;
-            _entries = new Entry[_primes[++_primeIndex]];
+            _primeIndex++;
+            _entries = new Entry[_primes[_primeIndex]];
+            int counter = 0;
 
-            int count = 0;
-            for (int i = 0; count < Count && i < oldArray.Length; i++)
+            for (int i = 0; counter < Count && i < oldArray.Length; i++)
             {
                 var entry = oldArray[i];
                 if (entry != null && entry != _deleted)
                 {
                     Put(entry);
-                    count++;
+                    counter++;
                 }
             }
 
@@ -89,6 +105,7 @@ namespace MyLibrary.DataStructures
         {
             int start = entry.HashCode;
             int i;
+
             for (i = 0; i < _entries.Length; i++)
             {
                 var position = (int)(start + c1 * i + c2 * i * i) % _entries.Length;
@@ -113,7 +130,10 @@ namespace MyLibrary.DataStructures
             {
                 var position = (int)(start + c1 * i + c2 * i * i) % _entries.Length;
                 var element = _entries[position];
-                if (element == null) return;
+                if (element == null)
+                {
+                    return;
+                }
                 else if (element != _deleted && element.Key.Equals(entry.Key))
                 {
                     throw new ArgumentException
@@ -135,9 +155,14 @@ namespace MyLibrary.DataStructures
 
         public void Add(TKey key, TValue value)
         {
-            if (key == null) throw new ArgumentNullException("key is null.");
-            var entry = new Entry(key, value, key.GetHashCode() & 0x7fffffff);
-            Insert(entry);
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is null.");
+            }
+            else
+            {
+                Insert(new Entry(key, value, key.GetHashCode() & 0x7fffffff));
+            }
         }
 
         public void Add(KeyValuePair<TKey, TValue> item)
@@ -153,13 +178,19 @@ namespace MyLibrary.DataStructures
 
         private int FindEntry(TKey key)
         {
-            if (key == null) throw new ArgumentNullException("key is null.");
+            if (key == null)
+            {
+                throw new ArgumentNullException("key is null.");
+            }
             int start = key.GetHashCode() & 0x7fffffff;
 
             for (int i = 0; i < _entries.Length; i++)
             {
                 int position = (int)(start + c1 * i + c2 * i * i) % _entries.Length;
-                if (_entries[position] == null) return -1;
+                if (_entries[position] == null)
+                {
+                    return -1;
+                }
                 else if (_entries[position] != _deleted && _entries[position].Key.Equals(key))
                 {
                     return position;
@@ -172,8 +203,14 @@ namespace MyLibrary.DataStructures
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
             var position = FindEntry(item.Key);
-            if (position < 0) return false;
-            else return item.Value.Equals(_entries[position].Value);
+            if (position < 0)
+            {
+                return false;
+            }
+            else
+            {
+                return item.Value.Equals(_entries[position].Value);
+            }
         }
 
         public bool ContainsKey(TKey key) => (FindEntry(key) >= 0);
@@ -198,29 +235,45 @@ namespace MyLibrary.DataStructures
 
             foreach (var elem in this)
             {
-                array[arrayIndex++] = elem;
+                array[arrayIndex] = elem;
+                arrayIndex++;
             }
+
+        }
+
+        private IEnumerable<Entry> EnumerateEntries()
+        {
+            int counter = 0;
+
+            foreach (var entry in _entries)
+            {
+                if (entry != null && entry != _deleted)
+                {
+                    yield return entry;
+                    counter++;
+                    if (counter == Count) break;
+                }
+            }
+
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            int i = 0;
-
-            foreach (var item in _entries)
+            
+            foreach(var entry in this.EnumerateEntries())
             {
-                if (item != null && item != _deleted)
-                {
-                    yield return new KeyValuePair<TKey, TValue>(item.Key, item.Value);
-                    i++;
-                    if (i == Count) break;
-                }
+                yield return new KeyValuePair<TKey, TValue>(entry.Key, entry.Value);
             }
+
         }
 
         public bool Remove(TKey key)
         {
             var position = FindEntry(key);
-            if (position < 0) return false;
+            if (position < 0)
+            {
+                return false;
+            }
             else
             {
                 _entries[position] = _deleted;
@@ -238,7 +291,10 @@ namespace MyLibrary.DataStructures
                 Count--;
                 return true;
             }
-            else return false;
+            else
+            {
+                return false;
+            }
         }
 
         public bool TryGetValue(TKey key, out TValue value)
