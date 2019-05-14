@@ -13,15 +13,14 @@ namespace MyLibrary.Algorithms
             item2 = temp;
         }
 
-        private static int LomutoPartition(T[] array, int start, int end,
-            IComparer<T> comparer)
+        private static int LomutoPartition(T[] array, int start, int end, IComparer<T> comparer)
         {
             var pivot = array[end];
             int i = start;
 
             for (int j = start; j < end; j++)
             {
-                if (comparer.Compare(array[j], pivot) <= 0)
+                if (comparer.Compare(array[j], pivot) < 0)
                 {
                     Swap(ref array[i], ref array[j]);
                     i++;
@@ -40,6 +39,16 @@ namespace MyLibrary.Algorithms
             return LomutoPartition(array, start, end, comparer);
         }
 
+        private static void QuickSortWithLomuto(T[] array, int start, int end, IComparer<T> comparer)
+        {
+            if (start < end)
+            {
+                var pivotIndex = RandomizedLomutoPartition(array, start, end, comparer);
+                QuickSortWithLomuto(array, start, pivotIndex - 1, comparer);
+                QuickSortWithLomuto(array, pivotIndex + 1, end, comparer);
+            }
+        }
+
         private static int HoarePartition(T[] array, int start, int end, IComparer<T> comparer,
             int pivotIndex = -1)
         {
@@ -56,7 +65,7 @@ namespace MyLibrary.Algorithms
                 do
                 {
                     rightIndex--;
-                } while (rightIndex > leftIndex && comparer.Compare(array[rightIndex], pivot) >= 0);
+                } while (comparer.Compare(array[rightIndex], pivot) > 0);
 
                 if (leftIndex < rightIndex)
                 {
@@ -70,24 +79,14 @@ namespace MyLibrary.Algorithms
 
         }
 
-        private static void QuickSortWithLomuto(T[] array, int start, int end, IComparer<T> comparer)
-        {
-            if (start < end)
-            {
-                int pivotIndex = RandomizedLomutoPartition(array, start, end, comparer);
-                QuickSortWithLomuto(array, start, pivotIndex - 1, comparer);
-                QuickSortWithLomuto(array, pivotIndex + 1, end, comparer);
-            }
-        }
-
         private static void QuickSortWithHoare(T[] array, int start, int end, IComparer<T> comparer)
         {
             if (start < end)
             {
-                int pivotIndex = HoarePartition(array, start, end, comparer,
+                var pivotIndex = HoarePartition(array, start, end, comparer,
                     new Random(DateTime.Now.Millisecond).Next(start, end + 1));
-                QuickSortWithHoare(array, start, pivotIndex - 1, comparer);
-                QuickSortWithHoare(array, pivotIndex, end, comparer);
+                QuickSortWithHoare(array, start, pivotIndex, comparer);
+                QuickSortWithHoare(array, pivotIndex + 1, end, comparer);
             }
         }
 
@@ -103,7 +102,7 @@ namespace MyLibrary.Algorithms
                 throw new ArgumentNullException("comparer is null");
             }
 
-            //QuickSortWithLomuto(array, 0, array.Length - 1, Comparer<T>.Default);
+            //QuickSortWithLomuto(array, 0, array.Length - 1, comparer);
             QuickSortWithHoare(array, 0, array.Length - 1, comparer);
         }
 
