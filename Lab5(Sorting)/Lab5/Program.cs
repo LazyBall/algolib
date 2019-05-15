@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Lab5
 {
     class Program
     {
         static void Main()
         {
-
+            int length = 1000000, numberOfTests = 20;
+            var worker = new Worker();
+            worker.ShowInfo(length, numberOfTests);
         }
     }
 }
