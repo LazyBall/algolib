@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyLibrary.Algorithms;
+using MyLibrary.Algorithms.Sorting;
 
 namespace Tests
 {

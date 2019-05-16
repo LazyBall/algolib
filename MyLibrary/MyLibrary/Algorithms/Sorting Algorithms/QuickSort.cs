@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MyLibrary.Algorithms
+namespace MyLibrary.Algorithms.Sorting
 {
     public static class QuickSort<T>
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using MyLibrary.DataStructures;
 
-namespace MyLibrary.Algorithms
+namespace MyLibrary.Algorithms.Sorting
 {
     public static class HeapSort<T> where T : IComparable<T>
     {

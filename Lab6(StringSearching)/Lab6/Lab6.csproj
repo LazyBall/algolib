@@ -4,16 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4238181B-5F3A-4D00-947A-96C9EC997908}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyLibrary</RootNamespace>
-    <AssemblyName>MyLibrary</AssemblyName>
+    <ProjectGuid>{B7143FF4-0B0D-4E9A-BA18-C46572E36B22}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Lab6</RootNamespace>
+    <AssemblyName>Lab6</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -41,22 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Algorithms\Sorting Algorithms\HeapSort.cs" />
-    <Compile Include="Algorithms\Sorting Algorithms\QuickSort.cs" />
-    <Compile Include="Algorithms\String-searching Algorithms\IStringSearchingAlgorithm.cs" />
-    <Compile Include="Algorithms\String-searching Algorithms\KnuthMorrisPrattAlgorithm.cs" />
-    <Compile Include="Algorithms\String-searching Algorithms\NaiveAlgorithm.cs" />
-    <Compile Include="Algorithms\String-searching Algorithms\PrefixFunction.cs" />
-    <Compile Include="Algorithms\String-searching Algorithms\RabinKarpAlgorithm.cs" />
-    <Compile Include="Data Structures\HashTable\HashTable.cs" />
-    <Compile Include="Data Structures\Heap\BinaryHeap.cs" />
-    <Compile Include="Data Structures\SkipList\SkipList.cs" />
-    <Compile Include="Data Structures\Tree\AVLTree.cs" />
-    <Compile Include="Data Structures\Tree\BinarySearchTree.cs" />
-    <Compile Include="Data Structures\Tree\DimasAVLTree.cs" />
-    <Compile Include="Data Structures\Tree\DimasBinarySearchTree.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Task.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

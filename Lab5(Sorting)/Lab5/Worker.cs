@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using MyLibrary.Algorithms;
+using MyLibrary.Algorithms.Sorting;
 
 namespace Lab5
 {

@@ -5,7 +5,7 @@ namespace Lab5
     {
         static void Main()
         {
-            int length = 1000000, numberOfTests = 20;
+            int length = 100000, numberOfTests = 20;
             var worker = new Worker();
             worker.ShowInfo(length, numberOfTests);
         }
