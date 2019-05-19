@@ -164,20 +164,6 @@ namespace MyLibrary.DataStructures
             Count++;
         }
 
-        //public void Print()
-        //{
-        //    for (int i = _currentLevel; i >= 0; i--)
-        //    {
-        //        var current = _head[i].Right;
-        //        while (current != null)
-        //        {
-        //            Console.Write(current.Key + " ");
-        //            current = current.Right;
-        //        }
-        //        Console.WriteLine();
-        //    }
-        //}
-
         private Node FindNode(TKey key)
         {
             if (key == null)
@@ -268,7 +254,14 @@ namespace MyLibrary.DataStructures
             }
             else
             {
-                return RemoveNode(node, nodeParent);
+                RemoveNode(node, nodeParent);
+
+                while (_currentLevel != 0 && _head[_currentLevel] == null)
+                {
+                    _currentLevel--;
+                }
+
+                return true;
             }
         }
 

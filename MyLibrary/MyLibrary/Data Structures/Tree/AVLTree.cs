@@ -446,7 +446,6 @@ namespace MyLibrary.DataStructures
                 }
 
                 current = stack.Pop();
-                Console.WriteLine(current.Key);
                 yield return current;
                 current = current.Right;
             }
