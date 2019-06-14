@@ -44,9 +44,11 @@ namespace MyLibrary.Algorithms.Sorting
 
         private static void SortWithBinarySearch(T[] array, IComparer<T> comparer)
         {
+            var comparerIgnoringEqual = new ComparerIgnoringEqual(comparer);
+
             for (int i = 1; i < array.Length; i++)
             {                                
-                int index = ~Array.BinarySearch(array, 0, i, array[i], new ComparerIgnoringEqual(comparer));
+                int index = ~Array.BinarySearch(array, 0, i, array[i], comparerIgnoringEqual);
                 if (index < i)
                 {
                     var item = array[i];
@@ -60,6 +62,7 @@ namespace MyLibrary.Algorithms.Sorting
                     array[index] = item;
                 }                              
             }
+
         }
 
         public static void Sort(T[] array)

@@ -60,6 +60,7 @@
     <Compile Include="SelectionSortTests.cs" />
     <Compile Include="SkipListTests.cs" />
     <Compile Include="SortTests.cs" />
+    <Compile Include="BubbleSortTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

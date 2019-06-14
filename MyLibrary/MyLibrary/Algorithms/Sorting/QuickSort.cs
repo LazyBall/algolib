@@ -106,11 +106,11 @@ namespace MyLibrary.Algorithms.Sorting
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array is null");
+                throw new ArgumentNullException("array is null.");
             }
             if (comparer == null)
             {
-                throw new ArgumentNullException("comparer is null");
+                throw new ArgumentNullException("comparer is null.");
             }
 
             //QuickSortWithLomuto(array, 0, array.Length - 1, comparer, new Random(DateTime.Now.Millisecond));
