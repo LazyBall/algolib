@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\Sorting Algorithms\HeapSort.cs" />
+    <Compile Include="Algorithms\Sorting Algorithms\InsertionSort.cs" />
     <Compile Include="Algorithms\Sorting Algorithms\QuickSort.cs" />
     <Compile Include="Algorithms\String-searching Algorithms\IStringSearchingAlgorithm.cs" />
     <Compile Include="Algorithms\String-searching Algorithms\KnuthMorrisPrattAlgorithm.cs" />
