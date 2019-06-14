@@ -29,13 +29,13 @@ namespace MyLibrary.Algorithms.Sorting
             }
 
             bool swapped = true;
-            int i = 0;
+            int i = 1;
 
             do
             {
                 swapped = false;
 
-                for (int j = 0; j < array.Length - i - 1; j++)
+                for (int j = 0; j < array.Length - i; j++)
                 {
                     if (comparer.Compare(array[j], array[j + 1]) > 0)
                     {
@@ -45,7 +45,7 @@ namespace MyLibrary.Algorithms.Sorting
                 }
 
                 i++;
-            } while (swapped && (i < array.Length - 1));
+            } while (swapped && (i < array.Length));
           
         }
     }

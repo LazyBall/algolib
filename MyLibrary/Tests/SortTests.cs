@@ -36,9 +36,9 @@ namespace Tests
         {
             var array = new int[count];
 
-            for (int i = count - 1; i >= 0; i--)
+            for (int i = 0; i < count; i++)
             {
-                array[i] = i;
+                array[i] = count - i;
             }
 
             return array;
