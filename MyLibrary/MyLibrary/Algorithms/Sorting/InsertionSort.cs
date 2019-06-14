@@ -5,7 +5,6 @@ namespace MyLibrary.Algorithms.Sorting
 {
     public static class InsertionSort<T>
     {
-
         public static void Sort(T[] array)
         {
             Sort(array, Comparer<T>.Default);
@@ -15,11 +14,11 @@ namespace MyLibrary.Algorithms.Sorting
         {
             if (array == null)
             {
-                throw new ArgumentNullException("array is null");
+                throw new ArgumentNullException("array is null.");
             }
             if (comparer == null)
             {
-                throw new ArgumentNullException("comparer is null");
+                throw new ArgumentNullException("comparer is null.");
             }
 
             for (int i = 1; i < array.Length; i++)
@@ -33,10 +32,13 @@ namespace MyLibrary.Algorithms.Sorting
                     j--;
                 }
 
-                array[j + 1] = item;
+                //проверка отличия позиции вставки от текущей позиции элемента
+                if (++j != i)
+                {
+                    array[j] = item;
+                }
             }
 
         }
-
     }
 }

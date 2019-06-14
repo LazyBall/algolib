@@ -3,11 +3,9 @@ using MyLibrary.Algorithms.Sorting;
 
 namespace Tests
 {
-
     [TestClass]
     public class InsertionSortTests
     {
-
         int n = 10000;
         SortTests tester = new SortTests();
 
@@ -40,7 +38,5 @@ namespace Tests
         {
             Assert.AreEqual(true, tester.TestSameValueArray(InsertionSort<int>.Sort, n));
         }
-
     }
-
 }

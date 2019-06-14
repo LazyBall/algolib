@@ -2,9 +2,9 @@
 using MyLibrary.Algorithms.Sorting;
 
 namespace Tests
-{
+{    
     [TestClass]
-    public class QuickSortTests
+    public class SelectionSortTests
     {
         int n = 10000;
         SortTests tester = new SortTests();
@@ -12,31 +12,31 @@ namespace Tests
         [TestMethod]
         public void EasyTest()
         {
-            Assert.AreEqual(true, tester.EasyTest(QuickSort<int>.Sort));
+            Assert.AreEqual(true, tester.EasyTest(SelectionSort<int>.Sort));
         }
 
         [TestMethod]
         public void TestRandomValues()
         {
-            Assert.AreEqual(true, tester.TestRandomValues(QuickSort<int>.Sort, n));
+            Assert.AreEqual(true, tester.TestRandomValues(SelectionSort<int>.Sort, n));
         }
 
         [TestMethod]
         public void TestSortedArray()
         {
-            Assert.AreEqual(true, tester.TestSortedArray(QuickSort<int>.Sort, n));
+            Assert.AreEqual(true, tester.TestSortedArray(SelectionSort<int>.Sort, n));
         }
 
         [TestMethod]
         public void TestSortedByDescendingArray()
         {
-            Assert.AreEqual(true, tester.TestSortedByDescendingArray(QuickSort<int>.Sort, n));
+            Assert.AreEqual(true, tester.TestSortedByDescendingArray(SelectionSort<int>.Sort, n));
         }
 
         [TestMethod]
         public void TestSameValueArray()
         {
-            Assert.AreEqual(true, tester.TestSameValueArray(QuickSort<int>.Sort, n));
+            Assert.AreEqual(true, tester.TestSameValueArray(SelectionSort<int>.Sort, n));
         }
     }
 }
