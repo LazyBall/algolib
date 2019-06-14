@@ -54,9 +54,11 @@
     <Compile Include="HeapSortTests.cs" />
     <Compile Include="IDictionaryTests.cs" />
     <Compile Include="AVLTreeTests.cs" />
+    <Compile Include="InsertionSortTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QuickSortTest.cs" />
+    <Compile Include="QuickSortTests.cs" />
     <Compile Include="SkipListTests.cs" />
+    <Compile Include="SortTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

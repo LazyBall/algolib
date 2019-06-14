@@ -1,16 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MyLibrary.Algorithms.Sorting;
+using System.Linq;
 
 namespace Tests
 {
 
-    [TestClass]
-    public class QuickSortTest
+    public class SortTests
     {
-        int n = 10000;
 
-        int[] GenerateRandomValues(int count)
+        private int[] GenerateRandomValues(int count)
         {
             var array = new int[count];
             var random = new Random(DateTime.Now.Millisecond);
@@ -23,7 +20,7 @@ namespace Tests
             return array;
         }
 
-        int[] GenerateSortedArray(int count)
+        private int[] GenerateSortedArray(int count)
         {
             var array = new int[count];
 
@@ -35,11 +32,11 @@ namespace Tests
             return array;
         }
 
-        int[] GeneratedSortedByDescendingArray(int count)
+        private int[] GeneratedSortedByDescendingArray(int count)
         {
             var array = new int[count];
 
-            for(int i=count-1; i>=0; i--)
+            for (int i = count - 1; i >= 0; i--)
             {
                 array[i] = i;
             }
@@ -47,11 +44,11 @@ namespace Tests
             return array;
         }
 
-        int[] GenerateSameValueArray(int count)
+        private int[] GenerateSameValueArray(int count)
         {
             var array = new int[count];
-            
-            for(int i=0; i<count; i++)
+
+            for (int i = 0; i < count; i++)
             {
                 array[i] = count;
             }
@@ -59,70 +56,56 @@ namespace Tests
             return array;
         }
 
-        [TestMethod]
-        public void EasyTest()
+        public bool EasyTest(Action<int[]> sort)
         {
             var arr1 = new int[] { 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 };
             var arr2 = new int[arr1.Length];
             Array.Copy(arr1, arr2, arr1.Length);
-
             Array.Sort(arr1);
-            QuickSort<int>.Sort(arr2);
-
-            CollectionAssert.AreEqual(arr1, arr2);
+            sort(arr2);
+            return arr1.SequenceEqual(arr2);
         }
 
-        [TestMethod]
-        public void TestRandomValues()
+        public bool TestRandomValues(Action<int[]> sort, int n)
         {
             var arr1 = GenerateRandomValues(n);
             var arr2 = new int[arr1.Length];
             Array.Copy(arr1, arr2, arr1.Length);
-
             Array.Sort(arr1);
-            QuickSort<int>.Sort(arr2);
-
-            CollectionAssert.AreEqual(arr1, arr2);           
+            sort(arr2);
+            return arr1.SequenceEqual(arr2);
         }
 
-        [TestMethod]
-        public void TestSortedArray()
+        public bool TestSortedArray(Action<int[]> sort, int n)
         {
             var arr1 = GenerateSortedArray(n);
             var arr2 = new int[arr1.Length];
             Array.Copy(arr1, arr2, arr1.Length);
-
             Array.Sort(arr1);
-            QuickSort<int>.Sort(arr2);
-
-            CollectionAssert.AreEqual(arr1, arr2);
+            sort(arr2);
+            return arr1.SequenceEqual(arr2);
         }
 
-        [TestMethod]
-        public void TestSortedByDescendingArray()
+        public bool TestSortedByDescendingArray(Action<int[]> sort, int n)
         {
             var arr1 = GeneratedSortedByDescendingArray(n);
             var arr2 = new int[arr1.Length];
             Array.Copy(arr1, arr2, arr1.Length);
-
             Array.Sort(arr1);
-            QuickSort<int>.Sort(arr2);
-
-            CollectionAssert.AreEqual(arr1, arr2);
+            sort(arr2);
+            return arr1.SequenceEqual(arr2);
         }
 
-        [TestMethod]
-        public void TestSameValueArray()
+        public bool TestSameValueArray(Action<int[]> sort, int n)
         {
             var arr1 = GenerateSameValueArray(n);
             var arr2 = new int[arr1.Length];
             Array.Copy(arr1, arr2, arr1.Length);
-
             Array.Sort(arr1);
-            QuickSort<int>.Sort(arr2);
-
-            CollectionAssert.AreEqual(arr1, arr2);
+            sort(arr2);
+            return arr1.SequenceEqual(arr2);
         }
 
     }
+
 }

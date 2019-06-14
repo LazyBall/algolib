@@ -5,7 +5,7 @@ namespace Tests
 {
 
     [TestClass]
-    public class HeapSortTests
+    public class InsertionSortTests
     {
 
         int n = 10000;
@@ -14,31 +14,31 @@ namespace Tests
         [TestMethod]
         public void EasyTest()
         {
-            Assert.AreEqual(true, tester.EasyTest(HeapSort<int>.Sort));
+            Assert.AreEqual(true, tester.EasyTest(InsertionSort<int>.Sort));
         }
 
         [TestMethod]
         public void TestRandomValues()
         {
-            Assert.AreEqual(true, tester.TestRandomValues(HeapSort<int>.Sort, n));
+            Assert.AreEqual(true, tester.TestRandomValues(InsertionSort<int>.Sort, n));
         }
 
         [TestMethod]
         public void TestSortedArray()
         {
-            Assert.AreEqual(true, tester.TestSortedArray(HeapSort<int>.Sort, n));
+            Assert.AreEqual(true, tester.TestSortedArray(InsertionSort<int>.Sort, n));
         }
 
         [TestMethod]
         public void TestSortedByDescendingArray()
         {
-            Assert.AreEqual(true, tester.TestSortedByDescendingArray(HeapSort<int>.Sort, n));
+            Assert.AreEqual(true, tester.TestSortedByDescendingArray(InsertionSort<int>.Sort, n));
         }
 
         [TestMethod]
         public void TestSameValueArray()
         {
-            Assert.AreEqual(true, tester.TestSameValueArray(HeapSort<int>.Sort, n));
+            Assert.AreEqual(true, tester.TestSameValueArray(InsertionSort<int>.Sort, n));
         }
 
     }

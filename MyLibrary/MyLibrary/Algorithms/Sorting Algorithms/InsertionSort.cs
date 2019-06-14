@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
-namespace MyLibrary.Algorithms
+namespace MyLibrary.Algorithms.Sorting
 {
     public static class InsertionSort<T>
     {
@@ -12,6 +13,14 @@ namespace MyLibrary.Algorithms
 
         public static void Sort(T[] array, IComparer<T> comparer)
         {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array is null");
+            }
+            if (comparer == null)
+            {
+                throw new ArgumentNullException("comparer is null");
+            }
 
             for (int i = 1; i < array.Length; i++)
             {
