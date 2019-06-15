@@ -80,8 +80,8 @@ namespace MyLibrary.Algorithms.Sorting
             {
                 throw new ArgumentNullException("comparer is null.");
             }
-            SortWithBinarySearch(array, comparer);
             //SortWithLinearSearch(array, comparer);
+            SortWithBinarySearch(array, comparer);           
         }
     }
 }

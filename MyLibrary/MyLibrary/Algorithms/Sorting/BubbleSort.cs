@@ -12,22 +12,26 @@ namespace MyLibrary.Algorithms.Sorting
             item2 = temp;
         }
 
-        public static void Sort(T[] array)
+        private static void SortWithoutOptimization(T[] array, IComparer<T> comparer)
         {
-            Sort(array, Comparer<T>.Default);
+
+            for (int i = 1; i < array.Length; i++)
+            {
+
+                for (int j = 1; j < array.Length; j++)
+                {
+                    if (comparer.Compare(array[j], array[j - 1]) < 0)
+                    {
+                        Swap(ref array[j], ref array[j - 1]);
+                    }
+                }
+
+            }
+
         }
 
-        public static void Sort(T[] array, IComparer<T> comparer)
+        private static void SortWithOptimization(T[] array, IComparer<T> comparer)
         {
-            if (array == null)
-            {
-                throw new ArgumentNullException("array is null.");
-            }
-            if (comparer == null)
-            {
-                throw new ArgumentNullException("comparer is null.");
-            }
-
             bool swapped = true;
             int i = 1;
 
@@ -46,7 +50,26 @@ namespace MyLibrary.Algorithms.Sorting
 
                 i++;
             } while (swapped && (i < array.Length));
-          
+
+        }
+
+        public static void Sort(T[] array)
+        {
+            Sort(array, Comparer<T>.Default);
+        }
+
+        public static void Sort(T[] array, IComparer<T> comparer)
+        {
+            if (array == null)
+            {
+                throw new ArgumentNullException("array is null.");
+            }
+            if (comparer == null)
+            {
+                throw new ArgumentNullException("comparer is null.");
+            }
+            //SortWithoutOptimization(array, comparer);
+            SortWithOptimization(array, comparer);          
         }
     }
 }
