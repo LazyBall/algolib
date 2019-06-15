@@ -32,24 +32,23 @@ namespace MyLibrary.Algorithms.Sorting
 
         private static void SortWithOptimization(T[] array, IComparer<T> comparer)
         {
-            bool swapped = true;
-            int i = 1;
+            int swapIndex = array.Length;
 
             do
             {
-                swapped = false;
+                int newSwapIndex = 0;
 
-                for (int j = 0; j < array.Length - i; j++)
+                for (int i = 1; i < swapIndex; i++)
                 {
-                    if (comparer.Compare(array[j], array[j + 1]) > 0)
+                    if (comparer.Compare(array[i], array[i - 1]) < 0)
                     {
-                        Swap(ref array[j], ref array[j + 1]);
-                        swapped = true;
+                        Swap(ref array[i], ref array[i - 1]);
+                        newSwapIndex = i;
                     }
                 }
 
-                i++;
-            } while (swapped && (i < array.Length));
+                swapIndex = newSwapIndex;
+            } while (swapIndex > 1);
 
         }
 
