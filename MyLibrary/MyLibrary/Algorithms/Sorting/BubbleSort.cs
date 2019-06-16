@@ -14,20 +14,16 @@ namespace MyLibrary.Algorithms.Sorting
 
         private static void SortWithoutOptimization(T[] array, IComparer<T> comparer)
         {
-
             for (int i = 1; i < array.Length; i++)
             {
-
-                for (int j = 1; j < array.Length; j++)
+                for (int j = array.Length - 1; j >= i; j--)
                 {
                     if (comparer.Compare(array[j], array[j - 1]) < 0)
                     {
                         Swap(ref array[j], ref array[j - 1]);
                     }
                 }
-
             }
-
         }
 
         private static void SortWithOptimization(T[] array, IComparer<T> comparer)
@@ -49,7 +45,6 @@ namespace MyLibrary.Algorithms.Sorting
 
                 swapIndex = newSwapIndex;
             } while (swapIndex > 1);
-
         }
 
         public static void Sort(T[] array)

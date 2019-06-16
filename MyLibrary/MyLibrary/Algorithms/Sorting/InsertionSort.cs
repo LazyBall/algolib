@@ -62,7 +62,6 @@ namespace MyLibrary.Algorithms.Sorting
                     array[index] = item;
                 }                              
             }
-
         }
 
         public static void Sort(T[] array)

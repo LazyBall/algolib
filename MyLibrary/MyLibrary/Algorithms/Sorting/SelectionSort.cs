@@ -45,7 +45,6 @@ namespace MyLibrary.Algorithms.Sorting
                     Swap(ref array[i], ref array[minIndex]);
                 }
             }
-
         }
     }
 }
