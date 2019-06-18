@@ -27,11 +27,10 @@ namespace MyLibrary.DataStructures
             _array = collection.ToArray();
             Count = _array.Length;
 
-            for (int i = Count / 2; i >= 0; i--)
+            for (int i = Count / 2 - 1; i >= 0; i--)
             {
                 Heapify(i);
             }
-
         }
 
         private void Resize()
@@ -43,38 +42,38 @@ namespace MyLibrary.DataStructures
 
         private void Heapify(int index)
         {
+            long current = index;
 
-            while (true)
+            do
             {
-                var leftChildIndex = (long)2 * index + 1;
-                var rightChildIndex = (long)2 * index + 2;
-                long largestChildIndex = index;
+                long left = current * 2 + 1,
+                    right = left + 1,
+                    largest = current;
 
-                if (leftChildIndex < Count &&
-                    _array[leftChildIndex].CompareTo(_array[largestChildIndex]) > 0)
+                if ((left < Count) &&
+                    (_array[left].CompareTo(_array[largest]) > 0))
                 {
-                    largestChildIndex = leftChildIndex;
+                    largest = left;
                 }
 
-                if (rightChildIndex < Count &&
-                    _array[rightChildIndex].CompareTo(_array[largestChildIndex]) > 0)
+                if ((right < Count) &&
+                    (_array[right].CompareTo(_array[largest]) > 0))
                 {
-                    largestChildIndex = rightChildIndex;
+                    largest = right;
                 }
 
-                if (largestChildIndex != index)
+                if (largest != current)
                 {
-                    var temp = _array[index];
-                    _array[index] = _array[largestChildIndex];
-                    _array[largestChildIndex] = temp;
-                    index = (int)largestChildIndex;
+                    var temp = _array[current];
+                    _array[current] = _array[largest];
+                    _array[largest] = temp;
+                    current = largest;
                 }
                 else
                 {
-                    break;
+                    current = -1;
                 }
-            }
-
+            } while (current != -1);
         }
 
         public void Add(T item)
@@ -127,7 +126,6 @@ namespace MyLibrary.DataStructures
 
         public bool Contains(T item)
         {
-
             for (int i = 0; i < Count; i++)
             {
                 if (_array[i].CompareTo(item) == 0)
@@ -138,6 +136,5 @@ namespace MyLibrary.DataStructures
 
             return false;
         }
-
     }
 }
