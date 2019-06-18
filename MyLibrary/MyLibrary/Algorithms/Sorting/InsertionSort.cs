@@ -48,8 +48,8 @@ namespace MyLibrary.Algorithms.Sorting
 
             for (int i = 1; i < array.Length; i++)
             {                                
-                int index = ~Array.BinarySearch(array, 0, i, array[i], comparerIgnoringEqual);
-                if (index < i)
+                int insertPosition = ~Array.BinarySearch(array, 0, i, array[i], comparerIgnoringEqual);
+                if (insertPosition < i)
                 {
                     var item = array[i];
                     int j = i;
@@ -57,9 +57,9 @@ namespace MyLibrary.Algorithms.Sorting
                     do
                     {
                         array[j] = array[--j];
-                    } while (j > index);
+                    } while (j > insertPosition);
 
-                    array[index] = item;
+                    array[insertPosition] = item;
                 }                              
             }
         }

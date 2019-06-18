@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace MyLibrary.Algorithms.Sorting
 {
+    //https://neerc.ifmo.ru/wiki/index.php?title=Сортировка_слиянием
     public static class MergeSort<T>
     {
         private static void Merge(T[] array, int left, int border, int right, IComparer<T> comparer)
