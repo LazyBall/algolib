@@ -47,11 +47,6 @@
     <Compile Include="Algorithms\Sorting\MergeSort.cs" />
     <Compile Include="Algorithms\Sorting\QuickSort.cs" />
     <Compile Include="Algorithms\Sorting\SelectionSort.cs" />
-    <Compile Include="Algorithms\String-searching\IStringSearchingAlgorithm.cs" />
-    <Compile Include="Algorithms\String-searching\KnuthMorrisPrattAlgorithm.cs" />
-    <Compile Include="Algorithms\String-searching\NaiveAlgorithm.cs" />
-    <Compile Include="Algorithms\String-searching\PrefixFunction.cs" />
-    <Compile Include="Algorithms\String-searching\RabinKarpAlgorithm.cs" />
     <Compile Include="Data Structures\HashTable\HashTable.cs" />
     <Compile Include="Data Structures\Heap\BinaryHeap.cs" />
     <Compile Include="Data Structures\SkipList\SkipList.cs" />
